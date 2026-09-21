@@ -1,0 +1,8 @@
+**/bin/
+**/obj/
+.git/
+.idea/
+.vs/
+src/Lighthouse.Mobile/
+tests/
+docs/

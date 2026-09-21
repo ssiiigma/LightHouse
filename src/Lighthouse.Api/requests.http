@@ -1,0 +1,51 @@
+### Rider HTTP Client: відкрийте файл і натискайте ▶ біля запитів.
+@host = http://localhost:5080
+
+### 1. Реєстрація
+POST {{host}}/api/auth/register
+Content-Type: application/json
+
+{ "name": "Test User", "email": "test@example.com", "password": "Passw0rd!" }
+
+### 2. Вхід — токен збережеться в змінну
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "test@example.com", "password": "Passw0rd!" }
+
+> {% client.global.set("token", response.body.accessToken); client.global.set("refresh", response.body.refreshToken); %}
+
+### 3. Створення/оновлення завдання (Id генерує клієнт)
+PUT {{host}}/api/tasks/3f2b8a56-8a3e-4c1e-9a55-0b6f3d0c1a01
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Submit report before deadline",
+  "description": null,
+  "deadlineUtc": "2026-10-01T12:00:00Z",
+  "priority": 3,
+  "categoryId": null,
+  "reminderAtUtc": null,
+  "completedAtUtc": null,
+  "subtasks": [ { "id": "aa111111-0000-4000-8000-000000000001", "title": "Draft", "isDone": true } ],
+  "clientUpdatedAtUtc": "2026-09-19T10:00:00Z"
+}
+
+### 4. Список завдань
+GET {{host}}/api/tasks
+Authorization: Bearer {{token}}
+
+### 5. Дельта змін (курсор = serverModifiedAtUtc останнього отриманого запису)
+GET {{host}}/api/tasks?modifiedSince=2026-09-19T00:00:00Z
+Authorization: Bearer {{token}}
+
+### 6. Видалення (м'яке)
+DELETE {{host}}/api/tasks/3f2b8a56-8a3e-4c1e-9a55-0b6f3d0c1a01
+Authorization: Bearer {{token}}
+
+### 7. Оновлення токенів
+POST {{host}}/api/auth/refresh
+Content-Type: application/json
+
+{ "refreshToken": "{{refresh}}" }
