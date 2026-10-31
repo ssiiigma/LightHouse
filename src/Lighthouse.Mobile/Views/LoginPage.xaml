@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Lighthouse.Mobile.ViewModels"
+             xmlns:conv="clr-namespace:Lighthouse.Mobile.Converters"
+             x:Class="Lighthouse.Mobile.Views.LoginPage"
+             x:DataType="vm:LoginViewModel"
+             Shell.NavBarIsVisible="False">
+    
+    <ContentPage.Resources>
+        <conv:StringToBoolConverter x:Key="StringToBoolConverter" />
+        <conv:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+    </ContentPage.Resources>
+    
+    <ScrollView>
+        <VerticalStackLayout Padding="32,64,32,32" Spacing="16">
+
+            <Label Text="Sign In" Style="{StaticResource TitleLabel}" />
+            <Label Text="Welcome back to Lighthouse" Style="{StaticResource SubtitleLabel}" Margin="0,0,0,16" />
+
+            <Entry Placeholder="Email" Keyboard="Email" Text="{Binding Email}"
+                   TextColor="{StaticResource TextPrimary}" PlaceholderColor="{StaticResource TextSecondary}" />
+            <BoxView HeightRequest="1" Color="{StaticResource TextDisabled}" />
+
+            <Entry Placeholder="Password" IsPassword="True" Text="{Binding Password}"
+                   TextColor="{StaticResource TextPrimary}" PlaceholderColor="{StaticResource TextSecondary}" />
+            <BoxView HeightRequest="1" Color="{StaticResource TextDisabled}" />
+
+            <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+                   IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBoolConverter}}" />
+
+            <Button Text="Sign In" Style="{StaticResource PrimaryButton}" Margin="0,16,0,0"
+                    Command="{Binding LoginCommand}" IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}" />
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
+                               Color="{StaticResource AccentGold}" />
+
+            <Button Text="Back" Style="{StaticResource SecondaryButton}"
+                    Command="{Binding GoBackCommand}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
