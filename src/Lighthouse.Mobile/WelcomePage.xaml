@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Lighthouse.Mobile.ViewModels"
+             x:Class="Lighthouse.Mobile.WelcomePage"
+             x:DataType="vm:WelcomeViewModel"
+             Shell.NavBarIsVisible="False">
+    
+    <Grid RowDefinitions="*,Auto" Padding="32,64,32,40">
+
+        <VerticalStackLayout Grid.Row="0" VerticalOptions="Center" Spacing="12">
+            <Label Text="LIGHTHOUSE" HorizontalOptions="Center"
+                   FontSize="34" FontAttributes="Bold" TextColor="{StaticResource TextPrimary}" />
+            <Label Text="INTELLIGENT PLANNER" HorizontalOptions="Center"
+                   FontSize="12" CharacterSpacing="3" TextColor="{StaticResource AccentGold}" />
+            <Label Text="Guiding you through the fog of daily chaos"
+                   HorizontalOptions="Center" HorizontalTextAlignment="Center"
+                   FontAttributes="Italic" Style="{StaticResource SubtitleLabel}" Margin="0,24,0,0" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Grid.Row="1" Spacing="12">
+            <Button Text="Sign In" Style="{StaticResource PrimaryButton}"
+                    Command="{Binding GoToLoginCommand}" />
+        </VerticalStackLayout>
+
+    </Grid>
+</ContentPage>
