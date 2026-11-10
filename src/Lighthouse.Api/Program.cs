@@ -5,6 +5,9 @@ using Lighthouse.Api.Infrastructure;
 using Lighthouse.Api.Options;
 using Lighthouse.Api.Services.Auth;
 using Lighthouse.Api.Services.Tasks;
+using Lighthouse.Api.Services.Behavior;
+using Lighthouse.Api.Services.Categories;
+using Lighthouse.Api.Services.Habits;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -61,6 +64,10 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
+builder.Services.AddScoped<IUserTimeService, UserTimeService>();
+builder.Services.AddScoped<IBehaviorRecorder, BehaviorRecorder>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IHabitService, HabitService>();
 
 var app = builder.Build();
 
@@ -87,5 +94,4 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok" })).AllowAnonymous();
 
 app.Run();
 
-// Потрібно для WebApplicationFactory<Program> в інтеграційних тестах.
 public partial class Program { }

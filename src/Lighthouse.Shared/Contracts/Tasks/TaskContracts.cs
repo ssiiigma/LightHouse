@@ -18,6 +18,7 @@ public sealed record TaskDto(
     Guid? CategoryId,
     DateTime? ReminderAtUtc,
     DateTime? CompletedAtUtc,
+    int? EstimatedMinutes,
     IReadOnlyList<SubtaskDto> Subtasks,
     DateTime UpdatedAtUtc,
     DateTime ServerModifiedAtUtc,
@@ -35,5 +36,6 @@ public sealed record UpsertTaskRequest(
     Guid? CategoryId,
     DateTime? ReminderAtUtc,
     DateTime? CompletedAtUtc,
+    int? EstimatedMinutes,
     IReadOnlyList<SubtaskDto> Subtasks,
     DateTime ClientUpdatedAtUtc);

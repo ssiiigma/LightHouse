@@ -1,18 +1,21 @@
+using System.Text.Json;
 using Lighthouse.Api.Data;
 using Lighthouse.Api.Infrastructure;
+using Lighthouse.Api.Services.Behavior;
 using Lighthouse.Core.Entities;
 using Lighthouse.Shared.Contracts.Tasks;
+using Lighthouse.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Lighthouse.Api.Services.Tasks;
 
-public sealed class TaskService(LighthouseDbContext db) : ITaskService
+public sealed class TaskService(LighthouseDbContext db, IBehaviorRecorder behavior) : ITaskService
 {
     public async Task<IReadOnlyList<TaskDto>> GetAsync(Guid userId, DateTime? modifiedSinceUtc, CancellationToken ct)
     {
         var query = db.Tasks.AsNoTracking().Include(t => t.Subtasks).Where(t => t.UserId == userId);
 
-        query = modifiedSinceUtc is { } since
+        query = SyncTime.ToUtc(modifiedSinceUtc) is { } since
             ? query.Where(t => t.ServerModifiedAtUtc > since)   // дельта: разом із «надгробками» видалених
             : query.Where(t => !t.IsDeleted);                   // перше завантаження
 
@@ -37,7 +40,8 @@ public sealed class TaskService(LighthouseDbContext db) : ITaskService
         }
 
         var now = DateTime.UtcNow;
-        var editedAt = request.ClientUpdatedAtUtc > now ? now : request.ClientUpdatedAtUtc;
+        var editedAt = SyncTime.ClampToNow(request.ClientUpdatedAtUtc, now);
+        var isNew = task is null;
 
         if (task is null)
         {
@@ -46,21 +50,49 @@ public sealed class TaskService(LighthouseDbContext db) : ITaskService
         }
         else if (task.UpdatedAtUtc > editedAt)
         {
-            return ToDto(task); // «останній запис»: на сервері вже новіша правка — клієнт отримає актуальний стан
+            return ToDto(task);
         }
+
+        // Стан «до» — для визначення переходів, що породжують поведінкові події (повторна відправка подій не дублює).
+        var previousDeadline = task.DeadlineUtc;
+        var wasCompleted = task.CompletedAtUtc is not null;
 
         task.Title = request.Title.Trim();
         task.Description = request.Description;
-        task.DeadlineUtc = request.DeadlineUtc;
+        task.DeadlineUtc = SyncTime.ToUtc(request.DeadlineUtc);
         task.Priority = request.Priority;
         task.CategoryId = request.CategoryId;
-        task.ReminderAtUtc = request.ReminderAtUtc;
-        task.CompletedAtUtc = request.CompletedAtUtc;
+        task.ReminderAtUtc = SyncTime.ToUtc(request.ReminderAtUtc);
+        task.CompletedAtUtc = SyncTime.ToUtc(request.CompletedAtUtc);
+        task.EstimatedMinutes = request.EstimatedMinutes;
         task.IsDeleted = false;
         task.UpdatedAtUtc = editedAt;
         task.ServerModifiedAtUtc = now;
 
         SyncSubtasks(task, request.Subtasks, now);
+
+        if (isNew)
+        {
+            await behavior.RecordAsync(userId, BehaviorEventType.TaskCreated, editedAt, taskId: id, ct: ct);
+        }
+
+        if (!wasCompleted && task.CompletedAtUtc is { } completedAt)
+        {
+            await behavior.RecordAsync(userId, BehaviorEventType.TaskCompleted,
+                SyncTime.ClampToNow(completedAt, now), taskId: id, ct: ct);
+        }
+
+        // «Відкладання» = перенесення дедлайну існуючого завдання на пізніший момент.
+        if (previousDeadline is { } oldDeadline && task.DeadlineUtc is { } newDeadline && newDeadline > oldDeadline)
+        {
+            var payload = JsonSerializer.Serialize(new
+            {
+                PreviousDeadlineUtc = SyncTime.ToUtc(oldDeadline),
+                NewDeadlineUtc = newDeadline
+            });
+            await behavior.RecordAsync(userId, BehaviorEventType.TaskPostponed, editedAt,
+                taskId: id, payloadJson: payload, ct: ct);
+        }
 
         await db.SaveChangesAsync(ct);
         return ToDto(task);
@@ -79,10 +111,21 @@ public sealed class TaskService(LighthouseDbContext db) : ITaskService
             throw new AppException(StatusCodes.Status404NotFound, "Task not found.");
         }
 
+        if (task.IsDeleted)
+        {
+            return;
+        }
+
         var now = DateTime.UtcNow;
         task.IsDeleted = true; // архів; фізичне видалення через 14 днів — окрема фонова задача (UC-09)
         task.UpdatedAtUtc = now;
         task.ServerModifiedAtUtc = now;
+
+        // Видалення невиконаного завдання вважається його пропуском.
+        if (task.CompletedAtUtc is null)
+        {
+            await behavior.RecordAsync(userId, BehaviorEventType.TaskSkipped, now, taskId: id, ct: ct);
+        }
 
         await db.SaveChangesAsync(ct);
     }
@@ -135,6 +178,7 @@ public sealed class TaskService(LighthouseDbContext db) : ITaskService
         t.CategoryId,
         t.ReminderAtUtc,
         t.CompletedAtUtc,
+        t.EstimatedMinutes,
         t.Subtasks.OrderBy(s => s.SortOrder).Select(s => new SubtaskDto(s.Id, s.Title, s.IsDone)).ToList(),
         t.UpdatedAtUtc,
         t.ServerModifiedAtUtc,

@@ -1,5 +1,6 @@
-### Rider HTTP Client: відкрийте файл і натискайте ▶ біля запитів.
 @host = http://localhost:5080
+@categoryId = 7c1d0f52-3a55-4b0e-8d61-2f0a9e4b1c01
+@habitId = 5e9b7a10-6c2d-4f3a-9b84-1d7e3c5a2b02
 
 ### 1. Реєстрація
 POST {{host}}/api/auth/register
@@ -15,7 +16,22 @@ Content-Type: application/json
 
 > {% client.global.set("token", response.body.accessToken); client.global.set("refresh", response.body.refreshToken); %}
 
-### 3. Створення/оновлення завдання (Id генерує клієнт)
+### 3. Категорія (upsert)
+PUT {{host}}/api/categories/{{categoryId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "name": "Study", "colorHex": "#4C8BF5", "icon": "book", "clientUpdatedAtUtc": "2026-11-10T08:00:00Z" }
+
+### 4. Список категорій / дельта
+GET {{host}}/api/categories
+Authorization: Bearer {{token}}
+
+###
+GET {{host}}/api/categories?modifiedSince=2026-11-01T00:00:00Z
+Authorization: Bearer {{token}}
+
+### 5. Завдання (Id генерує клієнт), з EstimatedMinutes і категорією
 PUT {{host}}/api/tasks/3f2b8a56-8a3e-4c1e-9a55-0b6f3d0c1a01
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -23,28 +39,114 @@ Content-Type: application/json
 {
   "title": "Submit report before deadline",
   "description": null,
-  "deadlineUtc": "2026-10-01T12:00:00Z",
+  "deadlineUtc": "2026-11-20T12:00:00Z",
   "priority": 3,
-  "categoryId": null,
+  "categoryId": "{{categoryId}}",
   "reminderAtUtc": null,
   "completedAtUtc": null,
+  "estimatedMinutes": 90,
   "subtasks": [ { "id": "aa111111-0000-4000-8000-000000000001", "title": "Draft", "isDone": true } ],
-  "clientUpdatedAtUtc": "2026-09-19T10:00:00Z"
+  "clientUpdatedAtUtc": "2026-11-10T10:00:00Z"
 }
 
-### 4. Список завдань
+### 5a. Відкладання: той самий запит із пізнішим дедлайном → подія TaskPostponed
+PUT {{host}}/api/tasks/3f2b8a56-8a3e-4c1e-9a55-0b6f3d0c1a01
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Submit report before deadline",
+  "description": null,
+  "deadlineUtc": "2026-11-22T12:00:00Z",
+  "priority": 3,
+  "categoryId": "{{categoryId}}",
+  "reminderAtUtc": null,
+  "completedAtUtc": null,
+  "estimatedMinutes": 90,
+  "subtasks": [],
+  "clientUpdatedAtUtc": "2026-11-10T11:00:00Z"
+}
+
+### 5b. Виконання → подія TaskCompleted
+PUT {{host}}/api/tasks/3f2b8a56-8a3e-4c1e-9a55-0b6f3d0c1a01
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Submit report before deadline",
+  "description": null,
+  "deadlineUtc": "2026-11-22T12:00:00Z",
+  "priority": 3,
+  "categoryId": "{{categoryId}}",
+  "reminderAtUtc": null,
+  "completedAtUtc": "2026-11-10T12:30:00Z",
+  "estimatedMinutes": 90,
+  "subtasks": [],
+  "clientUpdatedAtUtc": "2026-11-10T12:30:00Z"
+}
+
+### 6. Список завдань / дельта
 GET {{host}}/api/tasks
 Authorization: Bearer {{token}}
 
-### 5. Дельта змін (курсор = serverModifiedAtUtc останнього отриманого запису)
-GET {{host}}/api/tasks?modifiedSince=2026-09-19T00:00:00Z
+###
+GET {{host}}/api/tasks?modifiedSince=2026-11-01T00:00:00Z
 Authorization: Bearer {{token}}
 
-### 6. Видалення (м'яке)
+### 7. Звичка (щодня)
+PUT {{host}}/api/habits/{{habitId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Morning run",
+  "description": null,
+  "frequencyType": 0,
+  "daysOfWeekMask": 0,
+  "timesPerWeek": null,
+  "reminderTime": "07:30:00",
+  "colorHex": "#5BB97C",
+  "icon": "run",
+  "categoryId": null,
+  "clientUpdatedAtUtc": "2026-11-10T08:00:00Z"
+}
+
+### 8. Відмітка за день (тіло необов'язкове); повтор не дублює подію
+PUT {{host}}/api/habits/{{habitId}}/logs/2026-11-10
+Authorization: Bearer {{token}}
+
+###
+PUT {{host}}/api/habits/{{habitId}}/logs/2026-11-09
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "completedAtUtc": "2026-11-09T06:45:00Z" }
+
+### 9. Зняти відмітку
+DELETE {{host}}/api/habits/{{habitId}}/logs/2026-11-09
+Authorization: Bearer {{token}}
+
+### 10. Звички / дельта
+GET {{host}}/api/habits
+Authorization: Bearer {{token}}
+
+###
+GET {{host}}/api/habits?modifiedSince=2026-11-01T00:00:00Z
+Authorization: Bearer {{token}}
+
+### 11. Видалення (м'яке)
 DELETE {{host}}/api/tasks/3f2b8a56-8a3e-4c1e-9a55-0b6f3d0c1a01
 Authorization: Bearer {{token}}
 
-### 7. Оновлення токенів
+###
+DELETE {{host}}/api/categories/{{categoryId}}
+Authorization: Bearer {{token}}
+
+###
+DELETE {{host}}/api/habits/{{habitId}}
+Authorization: Bearer {{token}}
+
+### 12. Оновлення токенів
 POST {{host}}/api/auth/refresh
 Content-Type: application/json
 

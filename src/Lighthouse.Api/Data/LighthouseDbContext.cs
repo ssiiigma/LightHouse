@@ -16,10 +16,16 @@ public sealed class LighthouseDbContext(DbContextOptions<LighthouseDbContext> op
     public DbSet<BehaviorEvent> BehaviorEvents => Set<BehaviorEvent>();
     public DbSet<RecommendationFeedback> RecommendationFeedbacks => Set<RecommendationFeedback>();
     public DbSet<BanditState> BanditStates => Set<BanditState>();
+    
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        // Усі моменти часу в моделі — UTC
+        configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
+        configurationBuilder.Properties<DateTime?>().HaveConversion<NullableUtcDateTimeConverter>();
+    }
 
     protected override void OnModelCreating(ModelBuilder b)
     {
-        // Ідентифікатори генерує клієнт (офлайн-створення), тому БД їх не генерує.
         foreach (var entityType in b.Model.GetEntityTypes()
                      .Where(t => typeof(BaseEntity).IsAssignableFrom(t.ClrType)))
         {

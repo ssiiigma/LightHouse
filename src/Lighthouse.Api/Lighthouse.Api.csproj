@@ -1,10 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Lighthouse.Api</RootNamespace>
+    <UserSecretsId>25547226-1315-4371-8c74-a1ba07cbd0e3</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
