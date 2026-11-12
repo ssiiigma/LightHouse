@@ -1,8 +1,14 @@
+### Rider HTTP Client: відкрийте файл і натискайте ▶ біля запитів. Запускайте зверху вниз.
 @host = http://localhost:5080
-@categoryId = 7c1d0f52-3a55-4b0e-8d61-2f0a9e4b1c01
-@habitId = 5e9b7a10-6c2d-4f3a-9b84-1d7e3c5a2b02
+###@categoryId = 7c1d0f52-3a55-4b0e-8d61-2f0a9e4b1c01
+###@habitId = 5e9b7a10-6c2d-4f3a-9b84-1d7e3c5a2b02
+@categoryId = 2b6f4c18-9e07-4d3a-b5a1-8c0d7e1f3a44
+@habitId = 6a8c1d22-4e7b-4f90-a3d5-2b9e0c4f7a55
+@taskA = 9d4e2a10-1b3c-4e5f-8a6b-7c8d9e0f1a21
+@taskB = 9d4e2a10-1b3c-4e5f-8a6b-7c8d9e0f1a22
+@taskC = 9d4e2a10-1b3c-4e5f-8a6b-7c8d9e0f1a23
 
-### 1. Реєстрація
+### 1. Реєстрація (повторно дасть 409 — це нормально)
 POST {{host}}/api/auth/register
 Content-Type: application/json
 
@@ -16,7 +22,7 @@ Content-Type: application/json
 
 > {% client.global.set("token", response.body.accessToken); client.global.set("refresh", response.body.refreshToken); %}
 
-### 3. Категорія (upsert)
+### 3. Категорія (upsert) — потрібна для завдання A
 PUT {{host}}/api/categories/{{categoryId}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -31,58 +37,76 @@ Authorization: Bearer {{token}}
 GET {{host}}/api/categories?modifiedSince=2026-11-01T00:00:00Z
 Authorization: Bearer {{token}}
 
-### 5. Завдання (Id генерує клієнт), з EstimatedMinutes і категорією
-PUT {{host}}/api/tasks/3f2b8a56-8a3e-4c1e-9a55-0b6f3d0c1a01
+### 5. Завдання A: Critical, з категорією, оцінкою 90 хв
+PUT {{host}}/api/tasks/{{taskA}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
   "title": "Submit report before deadline",
   "description": null,
-  "deadlineUtc": "2026-11-20T12:00:00Z",
+  "deadlineUtc": "2026-11-12T09:00:00Z",
   "priority": 3,
   "categoryId": "{{categoryId}}",
   "reminderAtUtc": null,
   "completedAtUtc": null,
   "estimatedMinutes": 90,
   "subtasks": [ { "id": "aa111111-0000-4000-8000-000000000001", "title": "Draft", "isDone": true } ],
-  "clientUpdatedAtUtc": "2026-11-10T10:00:00Z"
+  "clientUpdatedAtUtc": "2026-11-10T09:00:00Z"
 }
 
-### 5a. Відкладання: той самий запит із пізнішим дедлайном → подія TaskPostponed
-PUT {{host}}/api/tasks/3f2b8a56-8a3e-4c1e-9a55-0b6f3d0c1a01
+### 5-B. Завдання B: Medium, без категорії і дедлайну
+PUT {{host}}/api/tasks/{{taskB}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Read a chapter",
+  "description": null,
+  "deadlineUtc": null,
+  "priority": 1,
+  "categoryId": null,
+  "reminderAtUtc": null,
+  "completedAtUtc": null,
+  "estimatedMinutes": 30,
+  "subtasks": [],
+  "clientUpdatedAtUtc": "2026-11-10T09:00:00Z"
+}
+
+### 5-C. Завдання C: прострочене (шар 1)
+PUT {{host}}/api/tasks/{{taskC}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Pay the invoice",
+  "description": null,
+  "deadlineUtc": "2026-11-09T12:00:00Z",
+  "priority": 2,
+  "categoryId": null,
+  "reminderAtUtc": null,
+  "completedAtUtc": null,
+  "estimatedMinutes": null,
+  "subtasks": [],
+  "clientUpdatedAtUtc": "2026-11-10T09:00:00Z"
+}
+
+### 5a. Відкладання: дедлайн A пізніше → подія TaskPostponed
+PUT {{host}}/api/tasks/{{taskA}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
   "title": "Submit report before deadline",
   "description": null,
-  "deadlineUtc": "2026-11-22T12:00:00Z",
+  "deadlineUtc": "2026-11-14T09:00:00Z",
   "priority": 3,
   "categoryId": "{{categoryId}}",
   "reminderAtUtc": null,
   "completedAtUtc": null,
   "estimatedMinutes": 90,
   "subtasks": [],
-  "clientUpdatedAtUtc": "2026-11-10T11:00:00Z"
-}
-
-### 5b. Виконання → подія TaskCompleted
-PUT {{host}}/api/tasks/3f2b8a56-8a3e-4c1e-9a55-0b6f3d0c1a01
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-  "title": "Submit report before deadline",
-  "description": null,
-  "deadlineUtc": "2026-11-22T12:00:00Z",
-  "priority": 3,
-  "categoryId": "{{categoryId}}",
-  "reminderAtUtc": null,
-  "completedAtUtc": "2026-11-10T12:30:00Z",
-  "estimatedMinutes": 90,
-  "subtasks": [],
-  "clientUpdatedAtUtc": "2026-11-10T12:30:00Z"
+  "clientUpdatedAtUtc": "2026-11-10T10:00:00Z"
 }
 
 ### 6. Список завдань / дельта
@@ -134,8 +158,28 @@ Authorization: Bearer {{token}}
 GET {{host}}/api/habits?modifiedSince=2026-11-01T00:00:00Z
 Authorization: Bearer {{token}}
 
-### 11. Видалення (м'яке)
-DELETE {{host}}/api/tasks/3f2b8a56-8a3e-4c1e-9a55-0b6f3d0c1a01
+### 13. Ранжування (створює ключі рекомендацій для перших 3 завдань)
+GET {{host}}/api/recommendations/ranking
+Authorization: Bearer {{token}}
+
+> {% if (response.body.ranked && response.body.ranked.length > 0) { client.global.set("recKey", response.body.ranked[0].recommendationKey); } %}
+
+### 14. Відгук: прийнято (action: 0 — Accepted, 1 — Rejected, 2 — Postponed)
+POST {{host}}/api/recommendations/feedback
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "recommendationKey": "{{recKey}}", "action": 0 }
+
+### 15. Той самий відгук повторно → { "applied": false }
+POST {{host}}/api/recommendations/feedback
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "recommendationKey": "{{recKey}}", "action": 0 }
+
+### 11. Видалення (м'яке) — запускайте в кінці
+DELETE {{host}}/api/tasks/{{taskB}}
 Authorization: Bearer {{token}}
 
 ###

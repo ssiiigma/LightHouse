@@ -3,11 +3,14 @@ using Lighthouse.Api.Services.Auth;
 using Lighthouse.Shared.Contracts.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Lighthouse.Api.Infrastructure;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Lighthouse.Api.Controllers;
 
 [Route("api/auth")]
 [AllowAnonymous]
+[EnableRateLimiting(RateLimitPolicies.Auth)]
 public sealed class AuthController(IAuthService auth) : ApiControllerBase
 {
     [HttpPost("register")]

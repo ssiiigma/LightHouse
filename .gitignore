@@ -8,3 +8,10 @@ obj/
 appsettings.Local.json
 *.log
 build_errors.txt
+
+.env
+lighthouse_dump.txt
+dump.sh
+build_errors.txt
+simulation-results/
+*.DotSettings.user

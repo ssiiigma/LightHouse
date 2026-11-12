@@ -22,6 +22,35 @@ namespace Lighthouse.Api.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Lighthouse.Core.Entities.Backup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("Content")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("int");
+
+                    b.Property<long>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Backups");
+                });
+
             modelBuilder.Entity("Lighthouse.Core.Entities.BanditState", b =>
                 {
                     b.Property<Guid>("Id")
@@ -42,6 +71,7 @@ namespace Lighthouse.Api.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Version")
+                        .IsConcurrencyToken()
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -89,6 +119,66 @@ namespace Lighthouse.Api.Data.Migrations
                     b.ToTable("BehaviorEvents");
                 });
 
+            modelBuilder.Entity("Lighthouse.Core.Entities.CalendarConnection", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CalendarId")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<DateTime>("ConnectedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("GoogleAccountEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("RefreshTokenProtected")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("CalendarConnections");
+                });
+
+            modelBuilder.Entity("Lighthouse.Core.Entities.CalendarEventLink", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("GoogleEventId")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("nvarchar(1024)");
+
+                    b.Property<DateTime>("LastSyncedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("TaskId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TaskId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CalendarEventLinks");
+                });
+
             modelBuilder.Entity("Lighthouse.Core.Entities.Category", b =>
                 {
                     b.Property<Guid>("Id")
@@ -127,6 +217,72 @@ namespace Lighthouse.Api.Data.Migrations
                     b.HasIndex("UserId", "ServerModifiedAtUtc");
 
                     b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("Lighthouse.Core.Entities.DeviceToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FcmToken")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<DateTime>("LastSeenAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FcmToken")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("DeviceTokens");
+                });
+
+            modelBuilder.Entity("Lighthouse.Core.Entities.EmailToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiresAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Purpose")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTime?>("UsedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("EmailTokens");
                 });
 
             modelBuilder.Entity("Lighthouse.Core.Entities.Habit", b =>
@@ -224,6 +380,81 @@ namespace Lighthouse.Api.Data.Migrations
                     b.ToTable("HabitLogs");
                 });
 
+            modelBuilder.Entity("Lighthouse.Core.Entities.ModelAuditEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("EventsCount")
+                        .HasColumnType("int");
+
+                    b.Property<double>("MeanReward")
+                        .HasColumnType("float");
+
+                    b.Property<int>("ModelVersion")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ModelAuditEntries");
+                });
+
+            modelBuilder.Entity("Lighthouse.Core.Entities.NotificationQueueItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("HabitId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ScheduledAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("SentAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("TaskId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("NotificationQueue", (string)null);
+                });
+
             modelBuilder.Entity("Lighthouse.Core.Entities.NotificationSettings", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -272,6 +503,12 @@ namespace Lighthouse.Api.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<DateTime?>("RespondedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double?>("Reward")
+                        .HasColumnType("float");
+
                     b.Property<Guid?>("TaskId")
                         .HasColumnType("uniqueidentifier");
 
@@ -281,6 +518,9 @@ namespace Lighthouse.Api.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("UserId", "CreatedAtUtc");
+
+                    b.HasIndex("UserId", "RecommendationKey")
+                        .IsUnique();
 
                     b.ToTable("RecommendationFeedbacks");
                 });
@@ -468,6 +708,15 @@ namespace Lighthouse.Api.Data.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("Lighthouse.Core.Entities.Backup", b =>
+                {
+                    b.HasOne("Lighthouse.Core.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Lighthouse.Core.Entities.BanditState", b =>
                 {
                     b.HasOne("Lighthouse.Core.Entities.User", null)
@@ -486,7 +735,49 @@ namespace Lighthouse.Api.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Lighthouse.Core.Entities.CalendarConnection", b =>
+                {
+                    b.HasOne("Lighthouse.Core.Entities.User", null)
+                        .WithOne()
+                        .HasForeignKey("Lighthouse.Core.Entities.CalendarConnection", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Lighthouse.Core.Entities.CalendarEventLink", b =>
+                {
+                    b.HasOne("Lighthouse.Core.Entities.TaskItem", null)
+                        .WithMany()
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Lighthouse.Core.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Lighthouse.Core.Entities.Category", b =>
+                {
+                    b.HasOne("Lighthouse.Core.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Lighthouse.Core.Entities.DeviceToken", b =>
+                {
+                    b.HasOne("Lighthouse.Core.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Lighthouse.Core.Entities.EmailToken", b =>
                 {
                     b.HasOne("Lighthouse.Core.Entities.User", null)
                         .WithMany()
@@ -514,6 +805,24 @@ namespace Lighthouse.Api.Data.Migrations
                     b.HasOne("Lighthouse.Core.Entities.Habit", null)
                         .WithMany("Logs")
                         .HasForeignKey("HabitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Lighthouse.Core.Entities.ModelAuditEntry", b =>
+                {
+                    b.HasOne("Lighthouse.Core.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Lighthouse.Core.Entities.NotificationQueueItem", b =>
+                {
+                    b.HasOne("Lighthouse.Core.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
