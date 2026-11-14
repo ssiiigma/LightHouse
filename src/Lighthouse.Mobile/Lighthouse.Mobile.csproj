@@ -42,4 +42,24 @@
         <ProjectReference Include="..\Lighthouse.Shared\Lighthouse.Shared.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <MauiXaml Update="Views\RegisterPage.xaml">
+        <SubType>Designer</SubType>
+      </MauiXaml>
+      <MauiXaml Update="Views\TasksPage.xaml">
+        <SubType>Designer</SubType>
+      </MauiXaml>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Views\RegisterPage.xaml.cs">
+        <DependentUpon>RegisterPage.xaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+      <Compile Update="Views\TasksPage.xaml.cs">
+        <DependentUpon>TasksPage.xaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
+    </ItemGroup>
+
 </Project>

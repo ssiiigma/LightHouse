@@ -1,11 +1,13 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Net;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Lighthouse.Mobile.Localization;
 using Lighthouse.Mobile.Services.Api;
 using Lighthouse.Mobile.Services.Auth;
 
 namespace Lighthouse.Mobile.ViewModels;
 
-public sealed partial class LoginViewModel(ApiClient api, ITokenStore tokenStore) : ObservableObject
+public sealed partial class LoginViewModel(IAuth auth, LocalizationService loc) : ObservableObject
 {
     [ObservableProperty]
     private string _email = string.Empty;
@@ -25,24 +27,33 @@ public sealed partial class LoginViewModel(ApiClient api, ITokenStore tokenStore
         if (IsBusy) return;
 
         ErrorMessage = null;
+        if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrEmpty(Password))
+        {
+            ErrorMessage = loc["Err_EnterCredentials"];
+            return;
+        }
+
         IsBusy = true;
         try
         {
-            var auth = await api.LoginAsync(Email.Trim(), Password, CancellationToken.None);
-            await tokenStore.SaveAsync(auth.AccessToken, auth.RefreshToken);
-            ErrorMessage = $"Успішний вхід: {auth.User.Name}"; // тимчасово, замінимо на навігацію пізніше
+            await auth.LoginAsync(Email.Trim(), Password);
+            await Shell.Current.GoToAsync("//tasks");
         }
-        catch (ApiException ex) when (ex.StatusCode is System.Net.HttpStatusCode.Unauthorized)
+        catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
         {
-            ErrorMessage = "Невірний email або пароль.";
+            ErrorMessage = loc["Err_InvalidCredentials"];
         }
-        catch (ApiException ex) when (ex.StatusCode is System.Net.HttpStatusCode.Locked)
+        catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.Locked)
         {
-            ErrorMessage = "Забагато спроб входу. Спробуйте пізніше.";
+            ErrorMessage = loc["Err_Locked"];
+        }
+        catch (ApiException ex) when (ex.StatusCode == (HttpStatusCode)429)
+        {
+            ErrorMessage = loc["Err_TooManyRequests"];
         }
         catch (Exception)
         {
-            ErrorMessage = "Немає з'єднання з сервером. Перевірте інтернет і спробуйте ще раз.";
+            ErrorMessage = loc["Err_NoConnection"];
         }
         finally
         {

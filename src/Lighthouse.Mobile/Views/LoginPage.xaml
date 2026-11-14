@@ -4,40 +4,40 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:Lighthouse.Mobile.ViewModels"
              xmlns:conv="clr-namespace:Lighthouse.Mobile.Converters"
+             xmlns:loc="clr-namespace:Lighthouse.Mobile.Localization"
              x:Class="Lighthouse.Mobile.Views.LoginPage"
              x:DataType="vm:LoginViewModel"
              Shell.NavBarIsVisible="False">
-    
+
     <ContentPage.Resources>
         <conv:StringToBoolConverter x:Key="StringToBoolConverter" />
         <conv:InvertedBoolConverter x:Key="InvertedBoolConverter" />
     </ContentPage.Resources>
-    
+
     <ScrollView>
-        <VerticalStackLayout Padding="32,64,32,32" Spacing="16">
+        <VerticalStackLayout Padding="28,72,28,32" Spacing="14">
 
-            <Label Text="Sign In" Style="{StaticResource TitleLabel}" />
-            <Label Text="Welcome back to Lighthouse" Style="{StaticResource SubtitleLabel}" Margin="0,0,0,16" />
+            <Label Text="LIGHTHOUSE" Style="{StaticResource PageLabel}" />
+            <Label Text="{loc:Translate Login_Title}" Style="{StaticResource TitleLabel}" />
+            <Label Text="{loc:Translate Login_Subtitle}" Style="{StaticResource SubtitleLabel}" Margin="0,0,0,12" />
 
-            <Entry Placeholder="Email" Keyboard="Email" Text="{Binding Email}"
-                   TextColor="{StaticResource TextPrimary}" PlaceholderColor="{StaticResource TextSecondary}" />
-            <BoxView HeightRequest="1" Color="{StaticResource TextDisabled}" />
+            <Border Style="{StaticResource FieldBorder}">
+                <Entry Placeholder="{loc:Translate Field_Email}" Keyboard="Email" Text="{Binding Email}" />
+            </Border>
+            <Border Style="{StaticResource FieldBorder}">
+                <Entry Placeholder="{loc:Translate Field_Password}" IsPassword="True" Text="{Binding Password}" />
+            </Border>
 
-            <Entry Placeholder="Password" IsPassword="True" Text="{Binding Password}"
-                   TextColor="{StaticResource TextPrimary}" PlaceholderColor="{StaticResource TextSecondary}" />
-            <BoxView HeightRequest="1" Color="{StaticResource TextDisabled}" />
-
-            <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}"
+            <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Red}"
                    IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBoolConverter}}" />
 
-            <Button Text="Sign In" Style="{StaticResource PrimaryButton}" Margin="0,16,0,0"
-                    Command="{Binding LoginCommand}" IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}" />
+            <Button Text="{loc:Translate Btn_SignIn}" Style="{StaticResource PrimaryButton}" Margin="0,12,0,0"
+                    Command="{Binding LoginCommand}"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}" />
 
-            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
-                               Color="{StaticResource AccentGold}" />
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
 
-            <Button Text="Back" Style="{StaticResource SecondaryButton}"
-                    Command="{Binding GoBackCommand}" />
+            <Button Text="{loc:Translate Btn_Back}" Style="{StaticResource GhostButton}" Command="{Binding GoBackCommand}" />
 
         </VerticalStackLayout>
     </ScrollView>

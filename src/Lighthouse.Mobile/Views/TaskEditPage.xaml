@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Lighthouse.Mobile.ViewModels"
+             xmlns:models="clr-namespace:Lighthouse.Mobile.Models"
+             xmlns:conv="clr-namespace:Lighthouse.Mobile.Converters"
+             xmlns:loc="clr-namespace:Lighthouse.Mobile.Localization"
+             xmlns:enums="clr-namespace:Lighthouse.Shared.Enums;assembly=Lighthouse.Shared"
+             x:Class="Lighthouse.Mobile.Views.TaskEditPage"
+             x:DataType="vm:TaskEditViewModel"
+             Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <conv:StringToBoolConverter x:Key="StringToBoolConverter" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*">
+
+        <Grid Padding="20,52,20,8" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+            <Button Text="‹" Command="{Binding GoBackCommand}" WidthRequest="40" HeightRequest="40" Padding="0"
+                    FontSize="24" CornerRadius="12" BackgroundColor="{StaticResource Card}"
+                    BorderColor="{StaticResource Dim}" BorderWidth="1" TextColor="{StaticResource Cream}" />
+            <Label Grid.Column="1" Text="{Binding PageTitle}" FontFamily="DMSansSemibold" FontSize="20"
+                   VerticalOptions="Center" />
+            <Button Grid.Column="2" Text="{loc:Translate Btn_Save}" Command="{Binding SaveCommand}"
+                    HeightRequest="40" Padding="22,0" FontSize="14" CornerRadius="20"
+                    BackgroundColor="{StaticResource GoldLight}" TextColor="{StaticResource Navy}" />
+        </Grid>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="16,8,16,32" Spacing="12">
+
+                <!-- Назва й опис -->
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout>
+                        <Entry Text="{Binding Title}" Placeholder="{loc:Translate Form_TitlePlaceholder}"
+                               FontFamily="DMSansSemibold" FontSize="17" Margin="12,4" />
+                        <BoxView HeightRequest="1" Color="{StaticResource Hairline}" />
+                        <Editor Text="{Binding Description}" Placeholder="{loc:Translate Form_DescPlaceholder}"
+                                AutoSize="TextChanges" MinimumHeightRequest="80" Margin="12,4" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Дата й час -->
+                <Border Style="{StaticResource CardBorder}" Padding="16,14">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="{loc:Translate Form_SectionDate}" Style="{StaticResource SectionLabel}" />
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="{loc:Translate Form_Deadline}" FontFamily="DMSansMedium" VerticalOptions="Center" />
+                            <Switch Grid.Column="1" IsToggled="{Binding HasDeadline}" />
+                        </Grid>
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10" IsVisible="{Binding HasDeadline}">
+                            <DatePicker Date="{Binding DeadlineDate}" />
+                            <TimePicker Grid.Column="1" Time="{Binding DeadlineTime}" />
+                        </Grid>
+
+                        <BoxView HeightRequest="1" Color="{StaticResource Hairline}" />
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="{loc:Translate Form_Reminder}" FontFamily="DMSansMedium" VerticalOptions="Center" />
+                            <Switch Grid.Column="1" IsToggled="{Binding HasReminder}" />
+                        </Grid>
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10" IsVisible="{Binding HasReminder}">
+                            <DatePicker Date="{Binding ReminderDate}" />
+                            <TimePicker Grid.Column="1" Time="{Binding ReminderTime}" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Пріоритет -->
+                <Border Style="{StaticResource CardBorder}" Padding="16,14">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="{loc:Translate Form_SectionPriority}" Style="{StaticResource SectionLabel}" />
+                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="8">
+                            <Button Text="{loc:Translate Priority_Low}" Style="{StaticResource ChipButton}"
+                                    BorderColor="#4CAF7D" Command="{Binding SetPriorityCommand}"
+                                    CommandParameter="{x:Static enums:TaskPriority.Low}">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding IsLow}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="#334CAF7D" />
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
+                            <Button Grid.Column="1" Text="{loc:Translate Priority_Medium}" Style="{StaticResource ChipButton}"
+                                    BorderColor="#5B9BD5" Command="{Binding SetPriorityCommand}"
+                                    CommandParameter="{x:Static enums:TaskPriority.Medium}">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding IsMedium}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="#335B9BD5" />
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
+                            <Button Grid.Row="1" Text="{loc:Translate Priority_High}" Style="{StaticResource ChipButton}"
+                                    BorderColor="#E8A23A" Command="{Binding SetPriorityCommand}"
+                                    CommandParameter="{x:Static enums:TaskPriority.High}">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding IsHigh}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="#33E8A23A" />
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
+                            <Button Grid.Row="1" Grid.Column="1" Text="{loc:Translate Priority_Critical}"
+                                    Style="{StaticResource ChipButton}" BorderColor="#E05C5C"
+                                    Command="{Binding SetPriorityCommand}"
+                                    CommandParameter="{x:Static enums:TaskPriority.Critical}">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding IsCritical}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="#33E05C5C" />
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Деталі -->
+                <Border Style="{StaticResource CardBorder}" Padding="16,14">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="{loc:Translate Form_SectionDetails}" Style="{StaticResource SectionLabel}" />
+
+                        <Label Text="{loc:Translate Form_Category}" FontFamily="DMSansMedium" />
+                        <Border Style="{StaticResource FieldBorder}">
+                            <Picker ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}"
+                                    ItemDisplayBinding="{Binding Name, x:DataType=models:CategoryModel}" />
+                        </Border>
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <Border Style="{StaticResource FieldBorder}">
+                                <Entry Text="{Binding NewCategoryName}" Placeholder="{loc:Translate Form_NewCategory}" />
+                            </Border>
+                            <Button Grid.Column="1" Text="+" Command="{Binding AddCategoryCommand}"
+                                    WidthRequest="48" HeightRequest="48" Padding="0" FontSize="22" CornerRadius="14" />
+                        </Grid>
+
+                        <Label Text="{loc:Translate Form_Estimate}" FontFamily="DMSansMedium" Margin="0,6,0,0" />
+                        <Border Style="{StaticResource FieldBorder}">
+                            <Entry Text="{Binding Estimate}" Keyboard="Numeric" Placeholder="30" />
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Підзавдання -->
+                <Border Style="{StaticResource CardBorder}" Padding="8,14">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{loc:Translate Form_SectionSubtasks}" Style="{StaticResource SectionLabel}" Margin="8,0,8,6" />
+
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Subtasks}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:SubtaskItem">
+                                    <Grid ColumnDefinitions="Auto,*,Auto">
+                                        <CheckBox IsChecked="{Binding IsDone}" Color="{StaticResource GoldLight}" />
+                                        <Entry Grid.Column="1" Text="{Binding Title}"
+                                               Placeholder="{loc:Translate Form_SubtaskPlaceholder}" FontSize="14" />
+                                        <Button Grid.Column="2" Text="✕" Clicked="OnRemoveSubtask"
+                                                BackgroundColor="Transparent" TextColor="{StaticResource Muted}"
+                                                WidthRequest="44" HeightRequest="44" Padding="0" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+
+                        <Button Text="{loc:Translate Form_AddSubtask}" Style="{StaticResource GhostButton}"
+                                HorizontalOptions="Start" Command="{Binding AddSubtaskCommand}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Red}"
+                       IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBoolConverter}}" />
+
+                <Button Text="{loc:Translate Btn_Delete}" Style="{StaticResource DangerButton}"
+                        Command="{Binding DeleteCommand}" IsVisible="{Binding IsExisting}" Margin="0,8,0,0" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

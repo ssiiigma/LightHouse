@@ -4,11 +4,18 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:Lighthouse.Mobile"
-    Title="Lighthouse.Mobile">
+    xmlns:views="clr-namespace:Lighthouse.Mobile.Views"
+    FlyoutBehavior="Disabled"
+    Title="Lighthouse">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:WelcomePage}"
-        Route="MainPage" />
+    <ShellContent Route="welcome" ContentTemplate="{DataTemplate local:WelcomePage}" />
+
+    <!-- Нижня панель вкладок; назви задаються в AppShell.xaml.cs (локалізація) -->
+    <TabBar>
+        <ShellContent x:Name="TasksTab" Route="tasks" Icon="tab_tasks.png"
+                      ContentTemplate="{DataTemplate views:TasksPage}" />
+        <ShellContent x:Name="ProfileTab" Route="profile" Icon="tab_profile.png"
+                      ContentTemplate="{DataTemplate views:ProfilePage}" />
+    </TabBar>
 
 </Shell>

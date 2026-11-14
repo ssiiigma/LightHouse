@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+    <resheader name="version"><value>2.0</value></resheader>
+    <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+    <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+    <data name="Welcome_Subtitle" xml:space="preserve"><value>INTELLIGENT PLANNER</value></data>
+    <data name="Welcome_Tagline" xml:space="preserve"><value>Guiding you through the fog of daily chaos</value></data>
+    <data name="Welcome_Or" xml:space="preserve"><value>OR</value></data>
+    <data name="Btn_CreateAccount" xml:space="preserve"><value>Create Account</value></data>
+    <data name="Btn_SignIn" xml:space="preserve"><value>Sign In</value></data>
+    <data name="Btn_Back" xml:space="preserve"><value>Back</value></data>
+    <data name="Btn_Add" xml:space="preserve"><value>Add</value></data>
+    <data name="Btn_Cancel" xml:space="preserve"><value>Cancel</value></data>
+    <data name="Btn_SignOut" xml:space="preserve"><value>Sign out</value></data>
+    <data name="Btn_SignOutConfirm" xml:space="preserve"><value>Sign out</value></data>
+    <data name="Login_Title" xml:space="preserve"><value>Sign In</value></data>
+    <data name="Login_Subtitle" xml:space="preserve"><value>Welcome back to Lighthouse</value></data>
+    <data name="Register_Title" xml:space="preserve"><value>Create Account</value></data>
+    <data name="Field_Name" xml:space="preserve"><value>Name</value></data>
+    <data name="Field_Email" xml:space="preserve"><value>Email</value></data>
+    <data name="Field_Password" xml:space="preserve"><value>Password</value></data>
+    <data name="Field_PasswordNew" xml:space="preserve"><value>Password (min 8 characters)</value></data>
+    <data name="Field_PasswordConfirm" xml:space="preserve"><value>Confirm password</value></data>
+    <data name="Err_EnterCredentials" xml:space="preserve"><value>Enter your email and password.</value></data>
+    <data name="Err_InvalidCredentials" xml:space="preserve"><value>Incorrect email or password.</value></data>
+    <data name="Err_Locked" xml:space="preserve"><value>Too many sign-in attempts. Try again in 15 minutes.</value></data>
+    <data name="Err_TooManyRequests" xml:space="preserve"><value>Too many requests. Try again in a minute.</value></data>
+    <data name="Err_NoConnection" xml:space="preserve"><value>Can't reach the server. Check your connection and try again.</value></data>
+    <data name="Err_EnterName" xml:space="preserve"><value>Enter your name.</value></data>
+    <data name="Err_InvalidEmail" xml:space="preserve"><value>Enter a valid email.</value></data>
+    <data name="Err_PasswordShort" xml:space="preserve"><value>Password must be at least {0} characters.</value></data>
+    <data name="Err_PasswordMismatch" xml:space="preserve"><value>Passwords don't match.</value></data>
+    <data name="Err_EmailTaken" xml:space="preserve"><value>This email is already registered.</value></data>
+    <data name="Err_CheckData" xml:space="preserve"><value>Please check the entered data.</value></data>
+    <data name="Tab_Tasks" xml:space="preserve"><value>Tasks</value></data>
+    <data name="Tab_Profile" xml:space="preserve"><value>Profile</value></data>
+    <data name="Tasks_NewPlaceholder" xml:space="preserve"><value>New task</value></data>
+    <data name="Settings_Label" xml:space="preserve"><value>Preferences</value></data>
+    <data name="Settings_Title" xml:space="preserve"><value>Settings</value></data>
+    <data name="Settings_Language" xml:space="preserve"><value>App language</value></data>
+    <data name="SignOut_Title" xml:space="preserve"><value>Sign out</value></data>
+    <data name="SignOut_Pending" xml:space="preserve"><value>{0} changes are not synced and will be lost if you sign out. Sign out?</value></data>
+    <data name="App_Footer" xml:space="preserve"><value>Lighthouse · Intelligent Planner</value></data>
+    <data name="Progress_Label" xml:space="preserve"><value>Daily Progress</value></data>
+    <data name="Group_Critical" xml:space="preserve"><value>Critical priority</value></data>
+    <data name="Group_High" xml:space="preserve"><value>High priority</value></data>
+    <data name="Group_Normal" xml:space="preserve"><value>Normal priority</value></data>
+    <data name="Tasks_Empty" xml:space="preserve"><value>No tasks yet. Tap “+” to add one.</value></data>
+    <data name="Sync_Syncing" xml:space="preserve"><value>Syncing...</value></data>
+    <data name="Sync_Offline" xml:space="preserve"><value>Offline: changes are saved on this device</value></data>
+    <data name="Sync_Error" xml:space="preserve"><value>Sync error, will retry later</value></data>
+    <data name="Due_Today" xml:space="preserve"><value>Today, {0}</value></data>
+    <data name="Due_Tomorrow" xml:space="preserve"><value>Tomorrow, {0}</value></data>
+    <data name="Due_Overdue" xml:space="preserve"><value>Overdue</value></data>
+    <data name="Due_Completed" xml:space="preserve"><value>Completed</value></data>
+    <data name="Task_Deleted" xml:space="preserve"><value>Task deleted</value></data>
+    <data name="Btn_Undo" xml:space="preserve"><value>Undo</value></data>
+    <data name="Btn_Save" xml:space="preserve"><value>Save</value></data>
+    <data name="Btn_Delete" xml:space="preserve"><value>Delete task</value></data>
+    <data name="Form_NewTask" xml:space="preserve"><value>New Task</value></data>
+    <data name="Form_EditTask" xml:space="preserve"><value>Edit Task</value></data>
+    <data name="Form_TitlePlaceholder" xml:space="preserve"><value>Task title…</value></data>
+    <data name="Form_DescPlaceholder" xml:space="preserve"><value>Description (optional)…</value></data>
+    <data name="Form_SectionDate" xml:space="preserve"><value>Date &amp; Time</value></data>
+    <data name="Form_Deadline" xml:space="preserve"><value>Deadline</value></data>
+    <data name="Form_Reminder" xml:space="preserve"><value>Reminder</value></data>
+    <data name="Form_SectionPriority" xml:space="preserve"><value>Priority</value></data>
+    <data name="Priority_Low" xml:space="preserve"><value>Low</value></data>
+    <data name="Priority_Medium" xml:space="preserve"><value>Medium</value></data>
+    <data name="Priority_High" xml:space="preserve"><value>High</value></data>
+    <data name="Priority_Critical" xml:space="preserve"><value>Critical</value></data>
+    <data name="Form_SectionDetails" xml:space="preserve"><value>Details</value></data>
+    <data name="Form_Category" xml:space="preserve"><value>Category</value></data>
+    <data name="Form_NoCategory" xml:space="preserve"><value>No category</value></data>
+    <data name="Form_NewCategory" xml:space="preserve"><value>New category</value></data>
+    <data name="Form_Estimate" xml:space="preserve"><value>Estimated duration, min</value></data>
+    <data name="Form_SectionSubtasks" xml:space="preserve"><value>Subtasks</value></data>
+    <data name="Form_AddSubtask" xml:space="preserve"><value>Add subtask</value></data>
+    <data name="Form_SubtaskPlaceholder" xml:space="preserve"><value>Subtask</value></data>
+    <data name="Err_TitleRequired" xml:space="preserve"><value>Enter a task title.</value></data>
+    <data name="Err_EstimateInvalid" xml:space="preserve"><value>Duration must be a number from 1 to 1440 minutes.</value></data>
+</root>

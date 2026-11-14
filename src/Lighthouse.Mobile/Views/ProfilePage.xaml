@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Lighthouse.Mobile.ViewModels"
+             xmlns:loc="clr-namespace:Lighthouse.Mobile.Localization"
+             x:Class="Lighthouse.Mobile.Views.ProfilePage"
+             x:DataType="vm:ProfileViewModel"
+             Shell.NavBarIsVisible="False">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20,56,20,24" Spacing="14">
+
+            <VerticalStackLayout Spacing="2">
+                <Label Text="{loc:Translate Settings_Label}" Style="{StaticResource PageLabel}" TextTransform="Uppercase" />
+                <Label Text="{loc:Translate Settings_Title}" Style="{StaticResource TitleLabel}" />
+            </VerticalStackLayout>
+
+            <Border Style="{StaticResource CardBorder}" Padding="16">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                    <Border WidthRequest="52" HeightRequest="52" StrokeThickness="0">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="16" />
+                        </Border.StrokeShape>
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="{StaticResource Gold}" Offset="0" />
+                                <GradientStop Color="#8B5A10" Offset="1" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Label Text="{Binding Initial}" FontFamily="DMSansSemibold" FontSize="21" TextColor="White"
+                               HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                        <Label Text="{Binding Name}" FontFamily="DMSansSemibold" FontSize="16" />
+                        <Label Text="{Binding Email}" Style="{StaticResource SubtitleLabel}" FontSize="12" />
+                    </VerticalStackLayout>
+                </Grid>
+            </Border>
+
+            <Label Text="{loc:Translate Settings_Language}" Style="{StaticResource SectionLabel}" Margin="0,8,0,0" />
+            <Border Style="{StaticResource CardBorder}" Padding="4" BackgroundColor="{StaticResource Card2}">
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="6">
+                    <Button Text="Українська" Style="{StaticResource SegmentButton}" Command="{Binding SetUkrainianCommand}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsUkrainian}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{StaticResource GoldLight}" />
+                                <Setter Property="TextColor" Value="{StaticResource Navy}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                    <Button Grid.Column="1" Text="English" Style="{StaticResource SegmentButton}" Command="{Binding SetEnglishCommand}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsEnglish}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{StaticResource GoldLight}" />
+                                <Setter Property="TextColor" Value="{StaticResource Navy}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <Button Text="{loc:Translate Btn_SignOut}" Style="{StaticResource DangerButton}" Margin="0,20,0,0"
+                    Command="{Binding SignOutCommand}" />
+            <Label Text="{loc:Translate App_Footer}" Style="{StaticResource CaptionLabel}" HorizontalTextAlignment="Center" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

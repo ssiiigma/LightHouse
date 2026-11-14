@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Lighthouse.Mobile.ViewModels"
+             xmlns:models="clr-namespace:Lighthouse.Mobile.Models"
+             xmlns:loc="clr-namespace:Lighthouse.Mobile.Localization"
+             x:Class="Lighthouse.Mobile.Views.TasksPage"
+             x:DataType="vm:TasksViewModel"
+             Shell.NavBarIsVisible="False">
+
+    <Grid>
+        <Grid RowDefinitions="Auto,Auto,*" Padding="20,52,20,0" RowSpacing="14">
+
+            <VerticalStackLayout Grid.Row="0" Spacing="2">
+                <Label Text="{Binding DateText}" Style="{StaticResource SectionLabel}" />
+                <Label Text="{loc:Translate Tab_Tasks}" Style="{StaticResource TitleLabel}" />
+                <Label Text="{Binding StatusText}" Style="{StaticResource CaptionLabel}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Grid.Row="1" Spacing="8">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Text="{loc:Translate Progress_Label}" Style="{StaticResource SectionLabel}" />
+                    <Label Grid.Column="1" Text="{Binding ProgressText}" Style="{StaticResource SectionLabel}" />
+                </Grid>
+                <ProgressBar Progress="{Binding Progress}" />
+            </VerticalStackLayout>
+
+            <RefreshView Grid.Row="2" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+                <CollectionView ItemsSource="{Binding Groups}" IsGrouped="True">
+
+                    <CollectionView.EmptyView>
+                        <Label Text="{loc:Translate Tasks_Empty}" Style="{StaticResource SubtitleLabel}"
+                               HorizontalTextAlignment="Center" Margin="0,48,0,0" />
+                    </CollectionView.EmptyView>
+
+                    <CollectionView.GroupHeaderTemplate>
+                        <DataTemplate x:DataType="vm:TaskGroup">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Padding="0,14,0,8">
+                                <BoxView WidthRequest="8" HeightRequest="8" CornerRadius="4"
+                                         Color="{Binding DotColor}" VerticalOptions="Center" />
+                                <Label Grid.Column="1" Text="{Binding Title}" Style="{StaticResource SectionLabel}" />
+                                <Label Grid.Column="2" Text="{Binding Count}" Style="{StaticResource CaptionLabel}" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.GroupHeaderTemplate>
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:TaskModel">
+                            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,8" Padding="0"
+                                    Opacity="{Binding CardOpacity}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnTaskTapped" />
+                                </Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="4,Auto,*,Auto">
+                                    <BoxView Color="{Binding AccentColor}" />
+
+                                    <Grid Grid.Column="1" WidthRequest="52" HeightRequest="56">
+                                        <Grid.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnToggleTapped" />
+                                        </Grid.GestureRecognizers>
+                                        <Border WidthRequest="22" HeightRequest="22" StrokeThickness="1.5"
+                                                Stroke="{Binding CheckBorderBrush}"
+                                                BackgroundColor="{Binding CheckFillColor}"
+                                                HorizontalOptions="Center" VerticalOptions="Center">
+                                            <Border.StrokeShape>
+                                                <RoundRectangle CornerRadius="8" />
+                                            </Border.StrokeShape>
+                                            <Label Text="✓" IsVisible="{Binding IsCompleted}" FontSize="12"
+                                                   TextColor="White" HorizontalOptions="Center" VerticalOptions="Center" />
+                                        </Border>
+                                    </Grid>
+
+                                    <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" Padding="0,12" Spacing="5">
+                                        <Label Text="{Binding Title}" FontFamily="DMSansMedium" FontSize="15"
+                                               TextDecorations="{Binding TitleDecorations}" />
+                                        <HorizontalStackLayout Spacing="8">
+                                            <Border IsVisible="{Binding HasCategory}" BackgroundColor="{StaticResource Card2}"
+                                                    StrokeThickness="0" Padding="9,2">
+                                                <Border.StrokeShape>
+                                                    <RoundRectangle CornerRadius="10" />
+                                                </Border.StrokeShape>
+                                                <Label Text="{Binding CategoryName}" FontSize="10" TextColor="{StaticResource Muted}" />
+                                            </Border>
+                                            <Label Text="{Binding DueText}" IsVisible="{Binding HasDue}"
+                                                   TextColor="{Binding DueColor}" FontSize="11" VerticalOptions="Center" />
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
+
+                                    <Label Grid.Column="3" Text="↻" IsVisible="{Binding IsUnsynced}" Margin="0,0,14,0"
+                                           VerticalOptions="Center" TextColor="{StaticResource Muted}" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </RefreshView>
+        </Grid>
+
+        <Button Text="+" Command="{Binding NewTaskCommand}"
+                HorizontalOptions="End" VerticalOptions="End" Margin="0,0,20,20"
+                WidthRequest="56" HeightRequest="56" CornerRadius="18" Padding="0" FontSize="30"
+                BackgroundColor="{StaticResource GoldLight}" TextColor="{StaticResource Navy}" />
+    </Grid>
+</ContentPage>

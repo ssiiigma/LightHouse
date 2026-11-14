@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Lighthouse.Mobile.ViewModels"
+             xmlns:conv="clr-namespace:Lighthouse.Mobile.Converters"
+             xmlns:loc="clr-namespace:Lighthouse.Mobile.Localization"
+             x:Class="Lighthouse.Mobile.Views.RegisterPage"
+             x:DataType="vm:RegisterViewModel"
+             Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <conv:StringToBoolConverter x:Key="StringToBoolConverter" />
+        <conv:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="28,72,28,32" Spacing="14">
+
+            <Label Text="LIGHTHOUSE" Style="{StaticResource PageLabel}" />
+            <Label Text="{loc:Translate Register_Title}" Style="{StaticResource TitleLabel}" Margin="0,0,0,12" />
+
+            <Border Style="{StaticResource FieldBorder}">
+                <Entry Placeholder="{loc:Translate Field_Name}" Text="{Binding Name}" />
+            </Border>
+            <Border Style="{StaticResource FieldBorder}">
+                <Entry Placeholder="{loc:Translate Field_Email}" Keyboard="Email" Text="{Binding Email}" />
+            </Border>
+            <Border Style="{StaticResource FieldBorder}">
+                <Entry Placeholder="{loc:Translate Field_PasswordNew}" IsPassword="True" Text="{Binding Password}" />
+            </Border>
+            <Border Style="{StaticResource FieldBorder}">
+                <Entry Placeholder="{loc:Translate Field_PasswordConfirm}" IsPassword="True" Text="{Binding ConfirmPassword}" />
+            </Border>
+
+            <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Red}"
+                   IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBoolConverter}}" />
+
+            <Button Text="{loc:Translate Btn_CreateAccount}" Style="{StaticResource PrimaryButton}" Margin="0,12,0,0"
+                    Command="{Binding RegisterCommand}"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}" />
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+
+            <Button Text="{loc:Translate Btn_Back}" Style="{StaticResource GhostButton}" Command="{Binding GoBackCommand}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
