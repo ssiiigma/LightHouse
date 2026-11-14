@@ -134,10 +134,11 @@ public sealed class SyncService : ISyncSvc
         {
             ct.ThrowIfCancellationRequested();
 
-            var item = await db.Table<OutboxItem>()
-                .Where(i => i.Attempts < OutboxStore.MaxAttempts)
-                .OrderBy(i => i.Id)
-                .FirstOrDefaultAsync();
+            var pending = await db.Table<OutboxItem>().Where(i => i.Attempts < OutboxStore.MaxAttempts).ToListAsync();
+            var item = pending
+                .OrderBy(i => _handlers.FirstOrDefault(h => h.EntityType == i.EntityType)?.PullOrder ?? int.MaxValue)
+                .ThenBy(i => i.Id)
+                .FirstOrDefault();
             if (item is null)
             {
                 return pushed;

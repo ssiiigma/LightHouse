@@ -86,3 +86,36 @@ public sealed class RankingCache
     public string? RecommendationKey { get; set; }
     public DateTime ComputedAtUtc { get; set; }
 }
+
+[Table("Habits")]
+public sealed class LocalHabit
+{
+    [PrimaryKey] public Guid Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public HabitFrequencyType FrequencyType { get; set; }
+    public int DaysOfWeekMask { get; set; }
+    public int? TimesPerWeek { get; set; }
+
+    /// <summary>Час нагадування, хвилини від опівночі (локальний час пристрою).</summary>
+    public int? ReminderMinutes { get; set; }
+    public string? ColorHex { get; set; }
+    public string? Icon { get; set; }
+    public DateTime UpdatedAtUtc { get; set; }
+    public DateTime ServerModifiedAtUtc { get; set; }
+    public bool IsDeleted { get; set; }
+    public SyncState SyncState { get; set; }
+}
+
+/// <summary>Відмітка за день. Ідентифікатор детермінований (звичка + дата), тому «поставити/зняти» зливається в одну операцію черги.</summary>
+[Table("HabitLogs")]
+public sealed class LocalHabitLog
+{
+    [PrimaryKey] public Guid Id { get; set; }
+    [Indexed] public Guid HabitId { get; set; }
+
+    /// <summary>Дата у форматі yyyy-MM-dd.</summary>
+    public string Date { get; set; } = string.Empty;
+    public DateTime CompletedAtUtc { get; set; }
+    public SyncState SyncState { get; set; }
+}

@@ -10,6 +10,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(Views.LoginPage), typeof(Views.LoginPage));
         Routing.RegisterRoute(nameof(Views.RegisterPage), typeof(Views.RegisterPage));
         Routing.RegisterRoute(nameof(Views.TaskEditPage), typeof(Views.TaskEditPage));
+        Routing.RegisterRoute(nameof(Views.HabitEditPage), typeof(Views.HabitEditPage));
 
         ApplyTitles();
         LocalizationService.Instance.PropertyChanged += (_, _) => ApplyTitles();
@@ -20,5 +21,6 @@ public partial class AppShell : Shell
         var loc = LocalizationService.Instance;
         TasksTab.Title = loc["Tab_Tasks"];
         ProfileTab.Title = loc["Tab_Profile"];
+        HabitsTab.Title = loc["Tab_Habits"];
     }
 }

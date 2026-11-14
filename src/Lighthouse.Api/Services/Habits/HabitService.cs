@@ -4,7 +4,7 @@ using Lighthouse.Api.Data;
 using Lighthouse.Api.Infrastructure;
 using Lighthouse.Api.Services.Behavior;
 using Lighthouse.Core.Entities;
-using Lighthouse.Core.Habits;
+using Lighthouse.Shared.Habits;
 using Lighthouse.Shared.Contracts.Habits;
 using Lighthouse.Shared.Enums;
 using Microsoft.EntityFrameworkCore;

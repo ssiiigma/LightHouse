@@ -27,8 +27,10 @@ public static class EntityTypes
 {
     public const string Task = "task";
     public const string Category = "category";
+    public const string Habit = "habit";
+    public const string HabitLog = "habitlog";
 
-    public static readonly string[] All = [Task, Category];
+    public static readonly string[] All = [Task, Category, Habit, HabitLog];
 }
 
 public static class PreferenceKeys

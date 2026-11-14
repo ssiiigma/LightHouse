@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Lighthouse.Mobile.ViewModels"
+             xmlns:conv="clr-namespace:Lighthouse.Mobile.Converters"
+             xmlns:loc="clr-namespace:Lighthouse.Mobile.Localization"
+             xmlns:enums="clr-namespace:Lighthouse.Shared.Enums;assembly=Lighthouse.Shared"
+             x:Class="Lighthouse.Mobile.Views.HabitEditPage"
+             x:DataType="vm:HabitEditViewModel"
+             Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <conv:StringToBoolConverter x:Key="StringToBoolConverter" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*">
+
+        <Grid Padding="20,52,20,8" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+            <Button Text="‹" Command="{Binding GoBackCommand}" WidthRequest="40" HeightRequest="40" Padding="0"
+                    FontSize="24" CornerRadius="12" BackgroundColor="{StaticResource Card}"
+                    BorderColor="{StaticResource Dim}" BorderWidth="1" TextColor="{StaticResource Cream}" />
+            <Label Grid.Column="1" Text="{Binding PageTitle}" FontFamily="DMSansSemibold" FontSize="20"
+                   VerticalOptions="Center" />
+            <Button Grid.Column="2" Text="{loc:Translate Btn_Save}" Command="{Binding SaveCommand}"
+                    HeightRequest="40" Padding="22,0" FontSize="14" CornerRadius="20"
+                    BackgroundColor="{StaticResource GoldLight}" TextColor="{StaticResource Navy}" />
+        </Grid>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="16,8,16,32" Spacing="12">
+
+                <Border Style="{StaticResource CardBorder}">
+                    <VerticalStackLayout>
+                        <Entry Text="{Binding Title}" Placeholder="{loc:Translate Habit_TitlePlaceholder}"
+                               FontFamily="DMSansSemibold" FontSize="17" Margin="12,4" />
+                        <BoxView HeightRequest="1" Color="{StaticResource Hairline}" />
+                        <Editor Text="{Binding Description}" Placeholder="{loc:Translate Form_DescPlaceholder}"
+                                AutoSize="TextChanges" MinimumHeightRequest="70" Margin="12,4" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Частота -->
+                <Border Style="{StaticResource CardBorder}" Padding="16,14">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="{loc:Translate Habit_SectionFrequency}" Style="{StaticResource SectionLabel}" />
+
+                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                            <Button Text="{loc:Translate Freq_Daily}" Style="{StaticResource ChipButton}" FontSize="12"
+                                    BorderColor="#E8B84B" Command="{Binding SetFrequencyCommand}"
+                                    CommandParameter="{x:Static enums:HabitFrequencyType.Daily}">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding IsDaily}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="#33E8B84B" />
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
+                            <Button Grid.Column="1" Text="{loc:Translate Freq_Specific}" Style="{StaticResource ChipButton}"
+                                    FontSize="12" BorderColor="#E8B84B" Command="{Binding SetFrequencyCommand}"
+                                    CommandParameter="{x:Static enums:HabitFrequencyType.SpecificDays}">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding IsSpecific}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="#33E8B84B" />
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
+                            <Button Grid.Column="2" Text="{loc:Translate Freq_Times}" Style="{StaticResource ChipButton}"
+                                    FontSize="12" BorderColor="#E8B84B" Command="{Binding SetFrequencyCommand}"
+                                    CommandParameter="{x:Static enums:HabitFrequencyType.TimesPerWeek}">
+                                <Button.Triggers>
+                                    <DataTrigger TargetType="Button" Binding="{Binding IsTimes}" Value="True">
+                                        <Setter Property="BackgroundColor" Value="#33E8B84B" />
+                                    </DataTrigger>
+                                </Button.Triggers>
+                            </Button>
+                        </Grid>
+
+                        <FlexLayout JustifyContent="SpaceBetween" IsVisible="{Binding IsSpecific}"
+                                    BindableLayout.ItemsSource="{Binding Days}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:DayChip">
+                                    <Border WidthRequest="40" HeightRequest="40" StrokeThickness="1.5" Stroke="#E8B84B"
+                                            BackgroundColor="Transparent">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="12" />
+                                        </Border.StrokeShape>
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="BackgroundColor" Value="#E8B84B" />
+                                            </DataTrigger>
+                                        </Border.Triggers>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnDayTapped" />
+                                        </Border.GestureRecognizers>
+                                        <Label Text="{Binding Label}" FontSize="11" FontFamily="DMSansSemibold"
+                                               HorizontalOptions="Center" VerticalOptions="Center">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                                    <Setter Property="TextColor" Value="#0A0E1A" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </FlexLayout>
+
+                        <Grid ColumnDefinitions="*,100" IsVisible="{Binding IsTimes}">
+                            <Label Text="{loc:Translate Habit_TimesLabel}" FontFamily="DMSansMedium" VerticalOptions="Center" />
+                            <Border Grid.Column="1" Style="{StaticResource FieldBorder}">
+                                <Entry Text="{Binding TimesPerWeekText}" Keyboard="Numeric" HorizontalTextAlignment="Center" />
+                            </Border>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Колір -->
+                <Border Style="{StaticResource CardBorder}" Padding="16,14">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="{loc:Translate Habit_SectionColor}" Style="{StaticResource SectionLabel}" />
+                        <FlexLayout JustifyContent="SpaceBetween" BindableLayout.ItemsSource="{Binding Colors}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:ColorChip">
+                                    <Border WidthRequest="38" HeightRequest="38" StrokeThickness="2"
+                                            BackgroundColor="{Binding Color}" Stroke="Transparent">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="19" />
+                                        </Border.StrokeShape>
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="Stroke" Value="#F5EDD8" />
+                                            </DataTrigger>
+                                        </Border.Triggers>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnColorTapped" />
+                                        </Border.GestureRecognizers>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </FlexLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Нагадування -->
+                <Border Style="{StaticResource CardBorder}" Padding="16,14">
+                    <VerticalStackLayout Spacing="10">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="{loc:Translate Form_Reminder}" FontFamily="DMSansMedium" VerticalOptions="Center" />
+                            <Switch Grid.Column="1" IsToggled="{Binding HasReminder}" />
+                        </Grid>
+                        <TimePicker Time="{Binding ReminderTime}" IsVisible="{Binding HasReminder}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Red}"
+                       IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBoolConverter}}" />
+
+                <Button Text="{loc:Translate Btn_DeleteHabit}" Style="{StaticResource DangerButton}"
+                        Command="{Binding DeleteCommand}" IsVisible="{Binding IsExisting}" Margin="0,8,0,0" />
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

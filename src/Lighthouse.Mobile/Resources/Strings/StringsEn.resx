@@ -81,4 +81,27 @@
     <data name="Form_SubtaskPlaceholder" xml:space="preserve"><value>Subtask</value></data>
     <data name="Err_TitleRequired" xml:space="preserve"><value>Enter a task title.</value></data>
     <data name="Err_EstimateInvalid" xml:space="preserve"><value>Duration must be a number from 1 to 1440 minutes.</value></data>
+    <data name="Tab_Habits" xml:space="preserve"><value>Habits</value></data>
+    <data name="Habits_Label" xml:space="preserve"><value>My Lighthouse</value></data>
+    <data name="Habits_Title" xml:space="preserve"><value>Habit Tracker</value></data>
+    <data name="Habits_Empty" xml:space="preserve"><value>No habits yet. Tap “+” to add one.</value></data>
+    <data name="Stat_Week" xml:space="preserve"><value>This week</value></data>
+    <data name="Stat_Today" xml:space="preserve"><value>Done today</value></data>
+    <data name="Stat_Best" xml:space="preserve"><value>Best streak</value></data>
+    <data name="Habit_Streak" xml:space="preserve"><value>Streak: {0} d</value></data>
+    <data name="Habit_WeekCount" xml:space="preserve"><value>{0} / {1} this week</value></data>
+    <data name="Habit_New" xml:space="preserve"><value>New Habit</value></data>
+    <data name="Habit_Edit" xml:space="preserve"><value>Edit Habit</value></data>
+    <data name="Habit_TitlePlaceholder" xml:space="preserve"><value>Habit name…</value></data>
+    <data name="Habit_SectionFrequency" xml:space="preserve"><value>Frequency</value></data>
+    <data name="Freq_Daily" xml:space="preserve"><value>Daily</value></data>
+    <data name="Freq_Specific" xml:space="preserve"><value>Specific days</value></data>
+    <data name="Freq_Times" xml:space="preserve"><value>N per week</value></data>
+    <data name="Habit_TimesLabel" xml:space="preserve"><value>Times per week</value></data>
+    <data name="Habit_SectionColor" xml:space="preserve"><value>Color</value></data>
+    <data name="Btn_DeleteHabit" xml:space="preserve"><value>Delete habit</value></data>
+    <data name="Habit_DeleteTitle" xml:space="preserve"><value>Delete habit</value></data>
+    <data name="Habit_DeleteConfirm" xml:space="preserve"><value>Delete the habit with all its check-ins?</value></data>
+    <data name="Err_HabitDays" xml:space="preserve"><value>Select at least one day.</value></data>
+    <data name="Err_HabitTimes" xml:space="preserve"><value>Times per week must be from 1 to 7.</value></data>
 </root>

@@ -38,6 +38,8 @@ public sealed class LocalDB : ILocalDB
                 await connection.CreateTableAsync<LocalCategory>();
                 await connection.CreateTableAsync<LocalTask>();
                 await connection.CreateTableAsync<LocalSubtask>();
+                await connection.CreateTableAsync<LocalHabit>();
+                await connection.CreateTableAsync<LocalHabitLog>();
                 await connection.CreateTableAsync<OutboxItem>();
                 await connection.CreateTableAsync<RankingCache>();
                 _connection = connection;
@@ -59,6 +61,8 @@ public sealed class LocalDB : ILocalDB
             tx.DeleteAll<LocalSubtask>();
             tx.DeleteAll<LocalTask>();
             tx.DeleteAll<LocalCategory>();
+            tx.DeleteAll<LocalHabitLog>();
+            tx.DeleteAll<LocalHabit>();
             tx.DeleteAll<OutboxItem>();
             tx.DeleteAll<RankingCache>();
         });

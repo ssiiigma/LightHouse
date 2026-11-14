@@ -1,4 +1,4 @@
-using Lighthouse.Core.Habits;
+using Lighthouse.Shared.Habits;
 using Lighthouse.Shared.Enums;
 using Xunit;
 

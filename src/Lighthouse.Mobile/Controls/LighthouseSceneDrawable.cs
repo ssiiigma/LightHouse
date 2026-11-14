@@ -2,13 +2,59 @@ using Microsoft.Maui.Graphics;
 
 namespace Lighthouse.Mobile.Controls;
 
-/// <summary>Нічна сцена з маяком для екрана привітання (малюється кодом за макетом 390×844, масштабується під екран).</summary>
+/// <summary>
+/// Нічна сцена з маяком (малюється кодом за макетом 390×844, масштабується під екран).
+/// Зірки розкидані по всьому небу, частина повільно мерехтить; промінь маяка м'яко хитається вправо-вліво.
+/// Анімація керується властивістю <see cref="Time"/> (секунди), яку оновлює сторінка.
+/// </summary>
 public sealed class LighthouseSceneDrawable : IDrawable
 {
+    private const int BeamLayers = 16;
+
     private static readonly Color Navy = Color.FromArgb("#0A0E1A");
     private static readonly Color Deep = Color.FromArgb("#0D1526");
     private static readonly Color Gold = Color.FromArgb("#C8922A");
     private static readonly Color GoldLight = Color.FromArgb("#E8B84B");
+
+    // Спільний вертикальний градієнт для шарів променя: яскравий біля ліхтаря, повністю прозорий угорі.
+    private static readonly LinearGradientPaint BeamPaint = new()
+    {
+        StartPoint = new Point(0.5, 1),
+        EndPoint = new Point(0.5, 0),
+        GradientStops =
+        [
+            new PaintGradientStop(0f, GoldLight.WithAlpha(0.06f)),
+            new PaintGradientStop(0.5f, GoldLight.WithAlpha(0.025f)),
+            new PaintGradientStop(1f, GoldLight.WithAlpha(0f))
+        ]
+    };
+
+    private static readonly Star[] Stars = CreateStars();
+
+    /// <summary>Час анімації в секундах.</summary>
+    public double Time { get; set; }
+
+    private readonly record struct Star(
+        float X, float Y, float Radius, float BaseAlpha, bool Twinkles, float Speed, float Phase);
+
+    private static Star[] CreateStars()
+    {
+        var random = new Random(11); // фіксоване зерно: однакове небо щоразу
+        var stars = new Star[72];
+        for (var i = 0; i < stars.Length; i++)
+        {
+            stars[i] = new Star(
+                X: (float)random.NextDouble(),
+                Y: (float)random.NextDouble(),
+                Radius: 0.6f + (float)random.NextDouble() * 1.2f,
+                BaseAlpha: 0.35f + (float)random.NextDouble() * 0.55f,
+                Twinkles: random.NextDouble() < 0.4,
+                Speed: 0.45f + (float)random.NextDouble() * 0.6f,   // період 6–14 с: повільне загасання
+                Phase: (float)(random.NextDouble() * Math.PI * 2));
+        }
+
+        return stars;
+    }
 
     public void Draw(ICanvas canvas, RectF dirtyRect)
     {
@@ -21,6 +67,7 @@ public sealed class LighthouseSceneDrawable : IDrawable
 
         var u = Math.Min(w / 390f, h / 844f);
         var cx = dirtyRect.X + w / 2f;
+        var t = (float)Time;
 
         // Геометрія: море знизу (під кнопками), скеля, маяк на скелі.
         var seaTop = h - 190f * u;
@@ -33,10 +80,12 @@ public sealed class LighthouseSceneDrawable : IDrawable
         var lanternCy = lanternTop + 13f * u;
 
         DrawSky(canvas, dirtyRect);
-        DrawStars(canvas, dirtyRect, u);
+        DrawStars(canvas, dirtyRect, seaTop, t, u);
 
-        Beam(canvas, cx, lanternCy, 22f * u, 120f * u, 340f * u, 0.16f);
-        Beam(canvas, cx, lanternCy, 10f * u, 55f * u, 340f * u, 0.5f);
+        // Промінь хитається: верх зміщується, основа лишається біля ліхтаря.
+        var sweep = MathF.Sin(t * 0.32f) * 85f * u;
+        DrawBeam(canvas, cx, lanternCy, sweep, 430f * u, u);
+
         for (var i = 0; i < 6; i++)
         {
             canvas.FillColor = GoldLight.WithAlpha(0.03f + i * 0.025f);
@@ -68,41 +117,49 @@ public sealed class LighthouseSceneDrawable : IDrawable
         canvas.FillRectangle(rect);
     }
 
-    private static void DrawStars(ICanvas canvas, RectF rect, float u)
+    private static void DrawStars(ICanvas canvas, RectF rect, float seaTop, float t, float u)
     {
-        var random = new Random(7); // фіксоване зерно: однакове небо щоразу
-        for (var i = 0; i < 110; i++)
+        var skyHeight = seaTop - 12f * u; // зірки по всьому небу, до самого горизонту
+        foreach (var star in Stars)
         {
-            var x = rect.X + (float)random.NextDouble() * rect.Width;
-            var y = rect.Y + (float)random.NextDouble() * rect.Height * 0.62f;
-            var radius = (0.5f + (float)random.NextDouble() * 1.3f) * Math.Max(u, 0.8f);
-            canvas.FillColor = Colors.White.WithAlpha(0.2f + (float)random.NextDouble() * 0.6f);
-            canvas.FillCircle(x, y, radius);
+            var alpha = star.BaseAlpha;
+            if (star.Twinkles)
+            {
+                // Плавне наростання й повільне затухання.
+                alpha *= 0.15f + 0.85f * (0.5f + 0.5f * MathF.Sin(t * star.Speed + star.Phase));
+            }
+
+            canvas.FillColor = Colors.White.WithAlpha(alpha);
+            canvas.FillCircle(
+                rect.X + star.X * rect.Width,
+                rect.Y + star.Y * skyHeight,
+                star.Radius * Math.Max(u, 0.8f));
         }
     }
 
-    /// <summary>Промінь від ліхтаря вгору: трапеція з градієнтом прозорості.</summary>
-    private static void Beam(ICanvas canvas, float cx, float y, float halfBottom, float halfTop, float length, float alpha)
+    /// <summary>
+    /// Один м'який промінь: багато вкладених напівпрозорих трапецій дають плавне зменшення яскравості
+    /// до країв (без видимого переходу між «двома променями»).
+    /// </summary>
+    private static void DrawBeam(ICanvas canvas, float cx, float y, float sweep, float length, float u)
     {
-        var path = new PathF();
-        path.MoveTo(cx - halfBottom, y);
-        path.LineTo(cx + halfBottom, y);
-        path.LineTo(cx + halfTop, y - length);
-        path.LineTo(cx - halfTop, y - length);
-        path.Close();
-
-        var paint = new LinearGradientPaint
+        var topY = y - length;
+        for (var i = 0; i < BeamLayers; i++)
         {
-            StartPoint = new Point(0.5, 1),
-            EndPoint = new Point(0.5, 0),
-            GradientStops =
-            [
-                new PaintGradientStop(0f, GoldLight.WithAlpha(alpha)),
-                new PaintGradientStop(1f, GoldLight.WithAlpha(0f))
-            ]
-        };
-        canvas.SetFillPaint(paint, new RectF(cx - halfTop, y - length, halfTop * 2f, length));
-        canvas.FillPath(path);
+            var k = (i + 1f) / BeamLayers;
+            var halfBottom = (3f + 18f * k) * u;
+            var halfTop = 150f * k * u;
+
+            var path = new PathF();
+            path.MoveTo(cx - halfBottom, y);
+            path.LineTo(cx + halfBottom, y);
+            path.LineTo(cx + sweep + halfTop, topY);
+            path.LineTo(cx + sweep - halfTop, topY);
+            path.Close();
+
+            canvas.SetFillPaint(BeamPaint, new RectF(cx - halfTop - Math.Abs(sweep), topY, (halfTop + Math.Abs(sweep)) * 2f, length));
+            canvas.FillPath(path);
+        }
     }
 
     private static void DrawSea(ICanvas canvas, RectF rect, float seaTop, float u)
@@ -163,11 +220,9 @@ public sealed class LighthouseSceneDrawable : IDrawable
     private static void DrawLighthouse(
         ICanvas canvas, float cx, float baseTop, float baseBottom, float towerTop, float galleryTop, float lanternTop, float u)
     {
-        // Кам'яна основа.
         canvas.FillColor = Color.FromArgb("#7E6E58");
         canvas.FillRoundedRectangle(cx - 20f * u, baseTop, 40f * u, baseBottom - baseTop, 3f * u);
 
-        // Вежа: трапеція з вертикальним градієнтом і горизонтальними смугами.
         const float topHalf = 11f;
         const float bottomHalf = 17f;
         var tower = new PathF();
@@ -198,7 +253,6 @@ public sealed class LighthouseSceneDrawable : IDrawable
             canvas.DrawLine(cx - half, y, cx + half, y);
         }
 
-        // Галерея, ліхтар і дах.
         canvas.FillColor = Gold;
         canvas.FillRoundedRectangle(cx - 19f * u, galleryTop, 38f * u, 6f * u, 2f * u);
 

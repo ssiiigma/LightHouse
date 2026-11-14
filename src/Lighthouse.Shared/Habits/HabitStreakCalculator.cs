@@ -1,6 +1,6 @@
 using Lighthouse.Shared.Enums;
 
-namespace Lighthouse.Core.Habits;
+namespace Lighthouse.Shared.Habits;
 
 /// <summary>Поточна та найкраща серії звички.</summary>
 public readonly record struct HabitStreaks(int Current, int Best);

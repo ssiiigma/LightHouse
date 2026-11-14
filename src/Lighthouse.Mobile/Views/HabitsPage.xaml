@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Lighthouse.Mobile.ViewModels"
+             xmlns:models="clr-namespace:Lighthouse.Mobile.Models"
+             xmlns:loc="clr-namespace:Lighthouse.Mobile.Localization"
+             x:Class="Lighthouse.Mobile.Views.HabitsPage"
+             x:DataType="vm:HabitsViewModel"
+             Shell.NavBarIsVisible="False">
+
+    <Grid>
+        <Grid RowDefinitions="Auto,Auto,Auto,*" Padding="20,52,20,0" RowSpacing="14">
+
+            <VerticalStackLayout Grid.Row="0" Spacing="2">
+                <Label Text="{loc:Translate Habits_Label}" Style="{StaticResource PageLabel}" TextTransform="Uppercase" />
+                <Label Text="{loc:Translate Habits_Title}" Style="{StaticResource TitleLabel}" />
+            </VerticalStackLayout>
+
+            <!-- Тиждень -->
+            <FlexLayout Grid.Row="1" JustifyContent="SpaceBetween" BindableLayout.ItemsSource="{Binding WeekDays}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="models:WeekDayItem">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="{Binding DayName}" Style="{StaticResource SectionLabel}" FontSize="9"
+                                   HorizontalOptions="Center" />
+                            <Border WidthRequest="38" HeightRequest="38" StrokeThickness="1.5"
+                                    Stroke="{Binding Stroke}" BackgroundColor="{Binding Background}">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12" />
+                                </Border.StrokeShape>
+                                <Label Text="{Binding Mark}" TextColor="{Binding Foreground}" FontFamily="DMSansSemibold"
+                                       FontSize="12" HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </FlexLayout>
+
+            <!-- Показники -->
+            <Border Grid.Row="2" Style="{StaticResource CardBorder}" Padding="0,14">
+                <Grid ColumnDefinitions="*,*,*">
+                    <VerticalStackLayout Spacing="3">
+                        <Label Text="{Binding WeekRateText}" FontFamily="DMSansBold" FontSize="20"
+                               TextColor="{StaticResource GoldLight}" HorizontalOptions="Center" />
+                        <Label Text="{loc:Translate Stat_Week}" Style="{StaticResource CaptionLabel}" FontSize="9"
+                               HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="3">
+                        <Label Text="{Binding TodayText}" FontFamily="DMSansBold" FontSize="20"
+                               TextColor="{StaticResource GoldLight}" HorizontalOptions="Center" />
+                        <Label Text="{loc:Translate Stat_Today}" Style="{StaticResource CaptionLabel}" FontSize="9"
+                               HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="2" Spacing="3">
+                        <Label Text="{Binding BestText}" FontFamily="DMSansBold" FontSize="20"
+                               TextColor="{StaticResource GoldLight}" HorizontalOptions="Center" />
+                        <Label Text="{loc:Translate Stat_Best}" Style="{StaticResource CaptionLabel}" FontSize="9"
+                               HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Grid>
+            </Border>
+
+            <RefreshView Grid.Row="3" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+                <CollectionView ItemsSource="{Binding Cards}">
+                    <CollectionView.EmptyView>
+                        <Label Text="{loc:Translate Habits_Empty}" Style="{StaticResource SubtitleLabel}"
+                               HorizontalTextAlignment="Center" Margin="0,40,0,0" />
+                    </CollectionView.EmptyView>
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:HabitCard">
+                            <Border Style="{StaticResource CardBorder}" Margin="0,0,0,12" Padding="0">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnCardTapped" />
+                                </Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="4,*">
+                                    <BoxView Color="{Binding Accent}" />
+                                    <VerticalStackLayout Grid.Column="1" Padding="14,14,14,12" Spacing="12">
+                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                            <Border WidthRequest="44" HeightRequest="44" StrokeThickness="0"
+                                                    BackgroundColor="{Binding AccentSoft}" VerticalOptions="Center">
+                                                <Border.StrokeShape>
+                                                    <RoundRectangle CornerRadius="14" />
+                                                </Border.StrokeShape>
+                                                <Label Text="{Binding Letter}" TextColor="{Binding Accent}"
+                                                       FontFamily="DMSansBold" FontSize="18"
+                                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                                            </Border>
+                                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="3">
+                                                <Label Text="{Binding Title}" FontFamily="DMSansSemibold" FontSize="15" />
+                                                <Label Text="{Binding StreakText}" Style="{StaticResource SubtitleLabel}" FontSize="11" />
+                                            </VerticalStackLayout>
+                                            <Border Grid.Column="2" WidthRequest="44" HeightRequest="44" StrokeThickness="1"
+                                                    Stroke="{StaticResource Dim}" BackgroundColor="{Binding MarkBackground}"
+                                                    VerticalOptions="Center">
+                                                <Border.StrokeShape>
+                                                    <RoundRectangle CornerRadius="14" />
+                                                </Border.StrokeShape>
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer Tapped="OnMarkTapped" />
+                                                </Border.GestureRecognizers>
+                                                <Label Text="{Binding MarkText}" TextColor="{Binding MarkForeground}"
+                                                       FontFamily="DMSansBold" FontSize="18"
+                                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                                            </Border>
+                                        </Grid>
+
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <HorizontalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding Dots}">
+                                                <BindableLayout.ItemTemplate>
+                                                    <DataTemplate x:DataType="models:DotItem">
+                                                        <Border WidthRequest="22" HeightRequest="6" StrokeThickness="1"
+                                                                Stroke="{Binding Stroke}" BackgroundColor="{Binding Fill}">
+                                                            <Border.StrokeShape>
+                                                                <RoundRectangle CornerRadius="3" />
+                                                            </Border.StrokeShape>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </BindableLayout.ItemTemplate>
+                                            </HorizontalStackLayout>
+                                            <Label Grid.Column="1" Text="{Binding WeekText}"
+                                                   Style="{StaticResource CaptionLabel}" TextColor="{StaticResource Muted}" />
+                                        </Grid>
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </RefreshView>
+        </Grid>
+
+        <Button Text="+" Command="{Binding NewHabitCommand}"
+                HorizontalOptions="End" VerticalOptions="End" Margin="0,0,20,20"
+                WidthRequest="56" HeightRequest="56" CornerRadius="18" Padding="0" FontSize="30"
+                BackgroundColor="{StaticResource GoldLight}" TextColor="{StaticResource Navy}" />
+    </Grid>
+</ContentPage>

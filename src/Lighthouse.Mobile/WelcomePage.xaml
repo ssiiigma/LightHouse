@@ -14,7 +14,7 @@
     </ContentPage.Resources>
 
     <Grid>
-        <GraphicsView Drawable="{StaticResource Scene}" InputTransparent="True" />
+        <GraphicsView x:Name="SceneView" Drawable="{StaticResource Scene}" InputTransparent="True" />
 
         <Grid RowDefinitions="2*,Auto,5*,Auto" Padding="24,0,24,38">
 
