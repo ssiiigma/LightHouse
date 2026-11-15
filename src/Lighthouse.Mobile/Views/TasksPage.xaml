@@ -4,21 +4,25 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:Lighthouse.Mobile.ViewModels"
              xmlns:models="clr-namespace:Lighthouse.Mobile.Models"
+             xmlns:views="clr-namespace:Lighthouse.Mobile.Views"
              xmlns:loc="clr-namespace:Lighthouse.Mobile.Localization"
              x:Class="Lighthouse.Mobile.Views.TasksPage"
              x:DataType="vm:TasksViewModel"
+             Style="{StaticResource TabPageStyle}"
              Shell.NavBarIsVisible="False">
 
     <Grid>
-        <Grid RowDefinitions="Auto,Auto,*" Padding="20,52,20,0" RowSpacing="14">
+        <Grid RowDefinitions="Auto,Auto,Auto,*" Padding="20,48,20,0" RowSpacing="14">
 
-            <VerticalStackLayout Grid.Row="0" Spacing="2">
+            <views:AdviceBannerView Grid.Row="0" BindingContext="{Binding Banner}" />
+
+            <VerticalStackLayout Grid.Row="1" Spacing="2">
                 <Label Text="{Binding DateText}" Style="{StaticResource SectionLabel}" />
                 <Label Text="{loc:Translate Tab_Tasks}" Style="{StaticResource TitleLabel}" />
                 <Label Text="{Binding StatusText}" Style="{StaticResource CaptionLabel}" />
             </VerticalStackLayout>
 
-            <VerticalStackLayout Grid.Row="1" Spacing="8">
+            <VerticalStackLayout Grid.Row="2" Spacing="8">
                 <Grid ColumnDefinitions="*,Auto">
                     <Label Text="{loc:Translate Progress_Label}" Style="{StaticResource SectionLabel}" />
                     <Label Grid.Column="1" Text="{Binding ProgressText}" Style="{StaticResource SectionLabel}" />
@@ -26,7 +30,7 @@
                 <ProgressBar Progress="{Binding Progress}" />
             </VerticalStackLayout>
 
-            <RefreshView Grid.Row="2" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
+            <RefreshView Grid.Row="3" IsRefreshing="{Binding IsRefreshing}" Command="{Binding RefreshCommand}">
                 <CollectionView ItemsSource="{Binding Groups}" IsGrouped="True">
 
                     <CollectionView.EmptyView>

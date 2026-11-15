@@ -138,4 +138,31 @@
     <data name="Export_NoNetwork" xml:space="preserve"><value>A network connection is required to export.</value></data>
     <data name="Export_Timeout" xml:space="preserve"><value>The server did not respond in time. Try again later.</value></data>
     <data name="Export_Failed" xml:space="preserve"><value>Could not generate the report. Try again later.</value></data>
+    <data name="Btn_Accept" xml:space="preserve"><value>Accept</value></data>
+    <data name="Btn_Reject" xml:space="preserve"><value>Reject</value></data>
+    <data name="Btn_Apply" xml:space="preserve"><value>Apply</value></data>
+    <data name="Btn_Dismiss" xml:space="preserve"><value>Dismiss</value></data>
+    <data name="Btn_Hide" xml:space="preserve"><value>Hide</value></data>
+    <data name="Advice_FocusTitle" xml:space="preserve"><value>Start with: “{0}”</value></data>
+    <data name="Advice_FocusDefault" xml:space="preserve"><value>The most important task right now</value></data>
+    <data name="Advice_Why" xml:space="preserve"><value>Why: {0}.</value></data>
+    <data name="Advice_Exploration" xml:space="preserve"><value>Lighthouse is trying a new option to get to know you better.</value></data>
+    <data name="Advice_More" xml:space="preserve"><value>{0} more</value></data>
+    <data name="Advice_Reschedule_Title" xml:space="preserve"><value>Consider changing the reminder time for “{0}”</value></data>
+    <data name="Advice_Reschedule_Summary" xml:space="preserve"><value>The reminder falls at a low-productivity time</value></data>
+    <data name="Advice_Reschedule_Detail" xml:space="preserve"><value>The reminder is set for {0}, but you usually complete tasks at another time: your most active slot is {1}. Move the reminder to {2}?</value></data>
+    <data name="Advice_Defer_Title" xml:space="preserve"><value>Too many tasks for today</value></data>
+    <data name="Advice_Defer_Detail" xml:space="preserve"><value>Your daily limit is {0} tasks. You can move these to the next day: {1}.</value></data>
+    <data name="Advice_Fit_Title" xml:space="preserve"><value>Not enough time before the deadline</value></data>
+    <data name="Advice_Fit_Detail" xml:space="preserve"><value>These don't fit the time before their deadline: {0}. Change the deadline or the estimate, or split the task into subtasks.</value></data>
+    <data name="Reason_priority" xml:space="preserve"><value>high task priority</value></data>
+    <data name="Reason_overdue" xml:space="preserve"><value>the task is already overdue</value></data>
+    <data name="Reason_deadline_within_day" xml:space="preserve"><value>less than a day until the deadline</value></data>
+    <data name="Reason_deadline_approaching" xml:space="preserve"><value>the deadline is approaching</value></data>
+    <data name="Reason_duration" xml:space="preserve"><value>the estimated duration is taken into account</value></data>
+    <data name="Reason_usual_time" xml:space="preserve"><value>you usually complete such tasks at this time</value></data>
+    <data name="Reason_usual_weekday" xml:space="preserve"><value>you usually complete tasks on this day of the week</value></data>
+    <data name="Reason_usual_category" xml:space="preserve"><value>you usually complete tasks of this category</value></data>
+    <data name="Reason_postponed" xml:space="preserve"><value>the task has been postponed before</value></data>
+    <data name="Reason_has_reminder" xml:space="preserve"><value>a reminder is set for the task</value></data>
 </root>

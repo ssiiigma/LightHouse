@@ -1,4 +1,4 @@
-namespace Lighthouse.Core.AI;
+namespace Lighthouse.Shared.Ranking;
 
 /// <summary>Причина рекомендації: стабільний код (для локалізації на клієнті) і шаблонний текст українською.</summary>
 public sealed record ExplanationReason(string Code, string Text);

@@ -1,6 +1,6 @@
 namespace Lighthouse.Core.AI;
 
-/// <summary>Параметри адаптивної пріоритизації</summary>
+/// <summary>Параметри адаптивної пріоритизації (специфікація 3.3.1).</summary>
 public static class LinUcbDefaults
 {
     public const int Dimension = 10;
@@ -21,19 +21,4 @@ public static class LinUcbDefaults
     /// <summary>Вага спостереження γ^(вік у повних тижнях).</summary>
     public static double ForgettingWeight(double ageDays) =>
         Math.Pow(Gamma, Math.Floor(Math.Max(0.0, ageDays) / 7.0));
-}
-
-/// <summary>Індекси компонентів вектора ознак x</summary>
-public static class FeatureIndex
-{
-    public const int Bias = 0;
-    public const int Priority = 1;
-    public const int Urgency = 2;
-    public const int Overdue = 3;
-    public const int Estimate = 4;
-    public const int HourBucketRate = 5;
-    public const int WeekDayRate = 6;
-    public const int CategoryRate = 7;
-    public const int Postpone = 8;
-    public const int Reminder = 9;
 }

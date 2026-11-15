@@ -138,4 +138,31 @@
     <data name="Export_NoNetwork" xml:space="preserve"><value>Для експорту потрібне з'єднання з мережею.</value></data>
     <data name="Export_Timeout" xml:space="preserve"><value>Сервер не відповів вчасно. Спробуйте пізніше.</value></data>
     <data name="Export_Failed" xml:space="preserve"><value>Не вдалося сформувати звіт. Спробуйте пізніше.</value></data>
+    <data name="Btn_Accept" xml:space="preserve"><value>Приймаю</value></data>
+    <data name="Btn_Reject" xml:space="preserve"><value>Відхиляю</value></data>
+    <data name="Btn_Apply" xml:space="preserve"><value>Застосувати</value></data>
+    <data name="Btn_Dismiss" xml:space="preserve"><value>Відхилити</value></data>
+    <data name="Btn_Hide" xml:space="preserve"><value>Сховати</value></data>
+    <data name="Advice_FocusTitle" xml:space="preserve"><value>Почніть із: «{0}»</value></data>
+    <data name="Advice_FocusDefault" xml:space="preserve"><value>Найважливіше завдання зараз</value></data>
+    <data name="Advice_Why" xml:space="preserve"><value>Чому: {0}.</value></data>
+    <data name="Advice_Exploration" xml:space="preserve"><value>Lighthouse пробує новий варіант, щоб краще вас пізнати.</value></data>
+    <data name="Advice_More" xml:space="preserve"><value>ще {0}</value></data>
+    <data name="Advice_Reschedule_Title" xml:space="preserve"><value>Краще змінити час нагадування для «{0}»</value></data>
+    <data name="Advice_Reschedule_Summary" xml:space="preserve"><value>Нагадування припадає на малопродуктивний час</value></data>
+    <data name="Advice_Reschedule_Detail" xml:space="preserve"><value>Нагадування стоїть на {0}, але зазвичай ви виконуєте завдання в інший час: найактивніший інтервал — {1}. Перенести нагадування на {2}?</value></data>
+    <data name="Advice_Defer_Title" xml:space="preserve"><value>Забагато завдань на сьогодні</value></data>
+    <data name="Advice_Defer_Detail" xml:space="preserve"><value>Ваш денний ліміт — {0} завдань. Можна перенести на наступну добу: {1}.</value></data>
+    <data name="Advice_Fit_Title" xml:space="preserve"><value>Не вистачає часу до дедлайну</value></data>
+    <data name="Advice_Fit_Detail" xml:space="preserve"><value>Не вкладаються в час до дедлайну: {0}. Змініть дедлайн чи оцінку тривалості або розбийте завдання на підзавдання.</value></data>
+    <data name="Reason_priority" xml:space="preserve"><value>високий пріоритет завдання</value></data>
+    <data name="Reason_overdue" xml:space="preserve"><value>завдання вже прострочене</value></data>
+    <data name="Reason_deadline_within_day" xml:space="preserve"><value>до дедлайну менше доби</value></data>
+    <data name="Reason_deadline_approaching" xml:space="preserve"><value>дедлайн наближається</value></data>
+    <data name="Reason_duration" xml:space="preserve"><value>враховано орієнтовну тривалість завдання</value></data>
+    <data name="Reason_usual_time" xml:space="preserve"><value>зазвичай ви виконуєте такі завдання в цей час</value></data>
+    <data name="Reason_usual_weekday" xml:space="preserve"><value>зазвичай ви виконуєте завдання в цей день тижня</value></data>
+    <data name="Reason_usual_category" xml:space="preserve"><value>завдання цієї категорії ви зазвичай виконуєте</value></data>
+    <data name="Reason_postponed" xml:space="preserve"><value>завдання вже відкладалось</value></data>
+    <data name="Reason_has_reminder" xml:space="preserve"><value>для завдання налаштовано нагадування</value></data>
 </root>

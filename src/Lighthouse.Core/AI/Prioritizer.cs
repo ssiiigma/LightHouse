@@ -1,5 +1,6 @@
 using Lighthouse.Core.Entities;
 using Lighthouse.Shared.Enums;
+using Lighthouse.Shared.Ranking;
 
 namespace Lighthouse.Core.AI;
 
@@ -23,7 +24,7 @@ public sealed record PrioritizationRequest(
 /// <param name="Position">Місце в рейтингу, з 1.</param>
 /// <param name="Context">Вектор ознак на момент показу (зберігається у ContextJson для перших K).</param>
 public sealed record RankedTask(
-    Guid TaskId, int Position, double Score, bool IsLayer1, double[] Context, Explanation Explanation);
+    Guid TaskId, int Position, double Score, bool IsLayer1, double[] Context, Shared.Ranking.Explanation Explanation);
 
 public sealed record PrioritizationResult(
     RankingMode Mode,
@@ -61,7 +62,7 @@ public sealed class Prioritizer : IPrioritizer
         var useModel = model is not null && request.FeedbackCount >= LinUcbDefaults.MinFeedbackEvents;
         var theta = useModel ? model!.Theta() : null;
 
-        var items = new List<(TaskItem Task, double Score, bool Layer1, double[] X, Explanation Explanation)>();
+        var items = new List<(TaskItem Task, double Score, bool Layer1, double[] X, Shared.Ranking.Explanation Explanation)>();
         foreach (var task in request.OpenTasks)
         {
             if (task.IsDeleted || task.CompletedAtUtc is not null)

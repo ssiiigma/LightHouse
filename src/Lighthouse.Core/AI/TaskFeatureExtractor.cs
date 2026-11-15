@@ -1,5 +1,6 @@
 using Lighthouse.Core.Entities;
 using Lighthouse.Shared.Enums;
+using Lighthouse.Shared.Ranking;
 
 namespace Lighthouse.Core.AI;
 

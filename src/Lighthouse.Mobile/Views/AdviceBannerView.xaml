@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Lighthouse.Mobile.ViewModels"
+             x:Class="Lighthouse.Mobile.Views.AdviceBannerView"
+             x:DataType="vm:AdviceBannerViewModel"
+             IsVisible="{Binding IsVisible}">
+
+    <Border BackgroundColor="#24C8922A" Stroke="#66C8922A" StrokeThickness="1" Padding="12,10">
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="22" />
+        </Border.StrokeShape>
+
+        <VerticalStackLayout Spacing="10">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ToggleCommand}" />
+                </Grid.GestureRecognizers>
+
+                <Image Source="advice_beacon" WidthRequest="36" HeightRequest="36" VerticalOptions="Center" />
+
+                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                    <Label Text="{Binding Title}" FontFamily="DMSansSemibold" FontSize="13"
+                           MaxLines="2" LineBreakMode="TailTruncation" />
+                    <Label Text="{Binding Summary}" IsVisible="{Binding IsCollapsed}"
+                           Style="{StaticResource SubtitleLabel}" FontSize="11"
+                           MaxLines="1" LineBreakMode="TailTruncation" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Grid.Column="2" Spacing="2" VerticalOptions="Center">
+                    <Label Text="{Binding Chevron}" TextColor="{StaticResource GoldLight}" HorizontalOptions="Center" />
+                    <Label Text="{Binding MoreText}" Style="{StaticResource CaptionLabel}" FontSize="9"
+                           HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="10">
+                <Label Text="{Binding Detail}" FontSize="12" LineHeight="1.35" TextColor="{StaticResource Cream}" />
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10" IsVisible="{Binding IsActionable}">
+                    <Button Text="{Binding ApplyText}" Command="{Binding ApplyCommand}"
+                            Style="{StaticResource PrimaryButton}" HeightRequest="42" FontSize="13" />
+                    <Button Grid.Column="1" Text="{Binding DismissText}" Command="{Binding DismissCommand}"
+                            Style="{StaticResource SecondaryButton}" HeightRequest="42" FontSize="13" />
+                </Grid>
+
+                <Button Text="{Binding DismissText}" Command="{Binding DismissCommand}" IsVisible="{Binding ShowHide}"
+                        Style="{StaticResource GhostButton}" HorizontalOptions="Start" />
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </Border>
+</ContentView>

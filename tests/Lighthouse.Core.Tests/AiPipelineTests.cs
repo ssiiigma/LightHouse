@@ -1,6 +1,7 @@
 using Lighthouse.Core.AI;
 using Lighthouse.Core.Entities;
 using Lighthouse.Shared.Enums;
+using Lighthouse.Shared.Ranking;
 using Xunit;
 
 namespace Lighthouse.Core.Tests;

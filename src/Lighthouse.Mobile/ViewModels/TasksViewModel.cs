@@ -19,9 +19,12 @@ public sealed class TaskGroup(string title, Color dotColor, IEnumerable<TaskMode
     public Color DotColor { get; } = dotColor;
 }
 
-public sealed partial class TasksViewModel(ITaskSvc tasks, ISyncSvc sync, IAuth auth, LocalizationService loc)
+public sealed partial class TasksViewModel(
+    ITaskSvc tasks, ISyncSvc sync, IAuth auth, LocalizationService loc, AdviceBannerViewModel banner)
     : ObservableObject
 {
+    public AdviceBannerViewModel Banner => banner;
+    
     [ObservableProperty]
     private bool _isRefreshing;
 
@@ -51,6 +54,7 @@ public sealed partial class TasksViewModel(ITaskSvc tasks, ISyncSvc sync, IAuth 
         await tasks.RecoverAsync();
         sync.Start();
         await LoadAsync();
+        _ = Banner.RefreshAsync(force: true);
         UpdateStatus(sync.Status);
     }
 
@@ -79,6 +83,7 @@ public sealed partial class TasksViewModel(ITaskSvc tasks, ISyncSvc sync, IAuth 
         {
             await sync.SyncNowAsync();
             await LoadAsync();
+            await Banner.RefreshAsync(force: true);
         }
         finally
         {
@@ -94,6 +99,8 @@ public sealed partial class TasksViewModel(ITaskSvc tasks, ISyncSvc sync, IAuth 
         var endOfToday = today.AddDays(1);
 
         var all = await tasks.GetTasksAsync();
+        Banner.Prune(all.Where(t => !t.IsCompleted).Select(t => t.Id).ToHashSet());
+        _ = Banner.RefreshAsync();
         var categories = (await tasks.GetCategoriesAsync()).ToDictionary(c => c.Id);
 
         // Денний прогрес: завдання з дедлайном до кінця сьогодні (разом із простроченими) + виконані сьогодні.
@@ -193,6 +200,7 @@ public sealed partial class TasksViewModel(ITaskSvc tasks, ISyncSvc sync, IAuth 
         {
             UpdateStatus(sync.Status);
             await LoadAsync();
+            await Banner.RefreshAsync(force: true);
         });
 
     private void OnSessionExpired() => MainThread.BeginInvokeOnMainThread(async () =>

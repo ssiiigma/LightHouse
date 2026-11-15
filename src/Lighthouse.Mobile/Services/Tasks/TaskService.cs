@@ -7,6 +7,7 @@ using Lighthouse.Mobile.Services.Sync;
 using Lighthouse.Shared.Contracts.Tasks;
 using Lighthouse.Shared.Enums;
 using Lighthouse.Shared.Contracts.Categories;
+using SQLite;
 
 namespace Lighthouse.Mobile.Services.Tasks;
 
@@ -40,6 +41,12 @@ public interface ITaskSvc
     Task<IReadOnlyList<CategoryModel>> GetCategoriesAsync();
     
     Task<Guid> SaveCategoryAsync(string name);
+    
+    /// <summary>Змінює час нагадування завдання (порада «перенести нагадування»).</summary>
+    Task SetReminderAsync(Guid id, DateTime reminderUtc);
+
+    /// <summary>Зсуває дедлайн і нагадування невиконаних завдань (порада «перенести на наступну добу»).</summary>
+    Task ShiftAsync(IReadOnlyList<Guid> ids, TimeSpan shift);
 }
 
 public sealed class TaskService(ILocalDB localDb, ISyncSvc sync) : ITaskSvc
@@ -158,6 +165,66 @@ public sealed class TaskService(ILocalDB localDb, ISyncSvc sync) : ITaskSvc
 
         Notify();
         return id;
+    }
+    
+    public async Task SetReminderAsync(Guid id, DateTime reminderUtc)
+    {
+        var now = Utc.Now;
+        var db = await localDb.GetConnectionAsync();
+        await db.RunInTransactionAsync(tx =>
+        {
+            var row = tx.Find<LocalTask>(id);
+            if (row is null || row.IsDeleted || row.CompletedAtUtc is not null)
+            {
+                return;
+            }
+
+            row.ReminderAtUtc = Utc.Ensure(reminderUtc);
+            Touch(tx, row, now);
+        });
+
+        Notify();
+    }
+
+    public async Task ShiftAsync(IReadOnlyList<Guid> ids, TimeSpan shift)
+    {
+        var now = Utc.Now;
+        var db = await localDb.GetConnectionAsync();
+        await db.RunInTransactionAsync(tx =>
+        {
+            foreach (var id in ids)
+            {
+                var row = tx.Find<LocalTask>(id);
+                if (row is null || row.IsDeleted || row.CompletedAtUtc is not null)
+                {
+                    continue;
+                }
+
+                if (row.DeadlineUtc is { } deadline)
+                {
+                    row.DeadlineUtc = Utc.Ensure(deadline) + shift;
+                }
+
+                if (row.ReminderAtUtc is { } reminder)
+                {
+                    row.ReminderAtUtc = Utc.Ensure(reminder) + shift;
+                }
+
+                Touch(tx, row, now);
+            }
+        });
+
+        Notify();
+    }
+
+    private static void Touch(SQLiteConnection tx, LocalTask row, DateTime now)
+    {
+        row.UpdatedAtUtc = now;
+        row.SyncState = SyncState.Pending;
+        tx.Update(row);
+
+        var subtasks = tx.Table<LocalSubtask>().Where(s => s.TaskId == row.Id).OrderBy(s => s.SortOrder).ToList();
+        OutboxStore.Enqueue(tx, EntityTypes.Task, row.Id, OutboxStore.Put, Serialize(row, subtasks));
     }
 
     public async Task SetCompletedAsync(Guid id, bool completed)

@@ -1,4 +1,4 @@
-namespace Lighthouse.Core.AI;
+namespace Lighthouse.Shared.Ranking;
 
 /// <summary>
 /// Евристика холодного старту та офлайн-режиму (діє і на клієнті): h = 0.45·x2 + 0.45·x3 + 0.10·x4.

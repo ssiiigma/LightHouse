@@ -46,6 +46,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<IEntitySyncHandler, HabitLogSyncHandler>();
         builder.Services.AddSingleton<Services.Habits.IHabitSvc, Services.Habits.HabitService>();
         builder.Services.AddSingleton<Services.Analytics.IAnalyticsSvc, Services.Analytics.AnalyticsService>();
+        builder.Services.AddSingleton<IEntitySyncHandler, FeedbackSyncHandler>();
+        builder.Services.AddSingleton<Services.AI.IAIClient, Services.AI.AIClientService>();
 
         // Екрани.
         builder.Services.AddTransient<ViewModels.WelcomeViewModel>();
@@ -66,6 +68,7 @@ public static class MauiProgram
         builder.Services.AddTransient<Views.HabitEditPage>();
         builder.Services.AddTransient<ViewModels.AnalyticsViewModel>();
         builder.Services.AddTransient<Views.AnalyticsPage>();
+        builder.Services.AddTransient<ViewModels.AdviceBannerViewModel>();
         
 #if DEBUG
         builder.Logging.AddDebug();

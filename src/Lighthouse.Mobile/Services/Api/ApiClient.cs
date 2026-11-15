@@ -19,6 +19,7 @@ public interface IApiClient
     Task<byte[]> GetBytesAsync(string path, CancellationToken ct);
     Task<TResponse> PutAsync<TRequest, TResponse>(string path, TRequest body, CancellationToken ct);
     Task DeleteAsync(string path, CancellationToken ct);
+    Task<TResponse> PostAsync<TRequest, TResponse>(string path, TRequest body, CancellationToken ct);
 }
 
 public sealed class ApiClient(HttpClient http, ISecureStore secureStore) : IApiClient
@@ -157,6 +158,14 @@ public sealed class ApiClient(HttpClient http, ISecureStore secureStore) : IApiC
         {
             throw new ApiException(response.StatusCode, await response.Content.ReadAsStringAsync(ct));
         }
+    }
+    
+    public async Task<TResponse> PostAsync<TRequest, TResponse>(string path, TRequest body, CancellationToken ct)
+    {
+        using var response = await SendAsync(
+            () => new HttpRequestMessage(HttpMethod.Post, path) { Content = JsonContent.Create(body) }, ct);
+        await EnsureSuccessAsync(response, ct);
+        return await ReadBodyAsync<TResponse>(response, ct);
     }
 }
 

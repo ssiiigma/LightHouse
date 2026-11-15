@@ -132,6 +132,8 @@ public sealed class AuthManager : IAuth
         Preferences.Default.Remove(PreferenceKeys.UserId);
         Preferences.Default.Remove(PreferenceKeys.UserName);
         Preferences.Default.Remove(PreferenceKeys.UserEmail);
+        AdviceStore.Clear();
+        Preferences.Default.Remove(PreferenceKeys.TimeZoneSent);
     }
 
     /// <summary>Читає claim-и name і email з корисного навантаження JWT (підпис тут не перевіряється: дані лише для відображення).</summary>
