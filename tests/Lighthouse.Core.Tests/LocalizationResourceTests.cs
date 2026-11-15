@@ -76,6 +76,7 @@ public class LocalizationResourceTests
         }
 
         Assert.NotEmpty(used);
-        Assert.Empty(used.Where(k => !keys.Contains(k)));
+        var missing = used.Where(k => !keys.Contains(k)).OrderBy(k => k).ToList();
+        Assert.True(missing.Count == 0, "Відсутні ключі локалізації: " + string.Join(", ", missing));
     }
 }

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Lighthouse.Mobile.ViewModels"
+             xmlns:models="clr-namespace:Lighthouse.Mobile.Models"
+             xmlns:conv="clr-namespace:Lighthouse.Mobile.Converters"
+             xmlns:loc="clr-namespace:Lighthouse.Mobile.Localization"
+             xmlns:periods="clr-namespace:Lighthouse.Shared.Analytics;assembly=Lighthouse.Shared"
+             x:Class="Lighthouse.Mobile.Views.AnalyticsPage"
+             x:DataType="vm:AnalyticsViewModel"
+             Style="{StaticResource TabPageStyle}"
+             Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <conv:StringToBoolConverter x:Key="StringToBoolConverter" />
+        <conv:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20,52,20,28" Spacing="14">
+
+            <VerticalStackLayout Spacing="2">
+                <Label Text="{loc:Translate Analytics_Label}" Style="{StaticResource PageLabel}" TextTransform="Uppercase" />
+                <Label Text="{loc:Translate Analytics_Title}" Style="{StaticResource TitleLabel}" />
+                <Label Text="{Binding RangeText}" Style="{StaticResource CaptionLabel}" />
+            </VerticalStackLayout>
+
+            <!-- Період -->
+            <Border Style="{StaticResource CardBorder}" Padding="4" BackgroundColor="{StaticResource Card2}">
+                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="4">
+                    <Button Text="{loc:Translate Period_Day}" Style="{StaticResource SegmentButton}" FontSize="12"
+                            Command="{Binding SetPeriodCommand}" CommandParameter="{x:Static periods:AnalyticsPeriod.Day}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsDay}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{StaticResource GoldLight}" />
+                                <Setter Property="TextColor" Value="{StaticResource Navy}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                    <Button Grid.Column="1" Text="{loc:Translate Period_Week}" Style="{StaticResource SegmentButton}" FontSize="12"
+                            Command="{Binding SetPeriodCommand}" CommandParameter="{x:Static periods:AnalyticsPeriod.Week}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsWeek}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{StaticResource GoldLight}" />
+                                <Setter Property="TextColor" Value="{StaticResource Navy}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                    <Button Grid.Column="2" Text="{loc:Translate Period_Month}" Style="{StaticResource SegmentButton}" FontSize="12"
+                            Command="{Binding SetPeriodCommand}" CommandParameter="{x:Static periods:AnalyticsPeriod.Month}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsMonth}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{StaticResource GoldLight}" />
+                                <Setter Property="TextColor" Value="{StaticResource Navy}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                    <Button Grid.Column="3" Text="{loc:Translate Period_Year}" Style="{StaticResource SegmentButton}" FontSize="12"
+                            Command="{Binding SetPeriodCommand}" CommandParameter="{x:Static periods:AnalyticsPeriod.Year}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsYear}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{StaticResource GoldLight}" />
+                                <Setter Property="TextColor" Value="{StaticResource Navy}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Показники -->
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                <Border Style="{StaticResource CardBorder}" Padding="14,12">
+                    <VerticalStackLayout Spacing="3">
+                        <Label Text="{Binding Kpi1.Value}" FontFamily="DMSansBold" FontSize="24" />
+                        <Label Text="{Binding Kpi1.Label}" Style="{StaticResource CaptionLabel}" TextColor="{StaticResource Muted}" />
+                        <Label Text="{Binding Kpi1.Delta}" TextColor="{Binding Kpi1.DeltaColor}" FontSize="10" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Column="1" Style="{StaticResource CardBorder}" Padding="14,12">
+                    <VerticalStackLayout Spacing="3">
+                        <Label Text="{Binding Kpi2.Value}" FontFamily="DMSansBold" FontSize="24" />
+                        <Label Text="{Binding Kpi2.Label}" Style="{StaticResource CaptionLabel}" TextColor="{StaticResource Muted}" />
+                        <Label Text="{Binding Kpi2.Delta}" TextColor="{Binding Kpi2.DeltaColor}" FontSize="10" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Row="1" Style="{StaticResource CardBorder}" Padding="14,12">
+                    <VerticalStackLayout Spacing="3">
+                        <Label Text="{Binding Kpi3.Value}" FontFamily="DMSansBold" FontSize="24" />
+                        <Label Text="{Binding Kpi3.Label}" Style="{StaticResource CaptionLabel}" TextColor="{StaticResource Muted}" />
+                        <Label Text="{Binding Kpi3.Delta}" TextColor="{Binding Kpi3.DeltaColor}" FontSize="10" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource CardBorder}" Padding="14,12">
+                    <VerticalStackLayout Spacing="3">
+                        <Label Text="{Binding Kpi4.Value}" FontFamily="DMSansBold" FontSize="24" />
+                        <Label Text="{Binding Kpi4.Label}" Style="{StaticResource CaptionLabel}" TextColor="{StaticResource Muted}" />
+                        <Label Text="{Binding Kpi4.Delta}" TextColor="{Binding Kpi4.DeltaColor}" FontSize="10" />
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+
+            <!-- Завдання за днями -->
+            <Border Style="{StaticResource CardBorder}" Padding="14">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="{loc:Translate Chart_Tasks}" Style="{StaticResource SectionLabel}" />
+                    <GraphicsView x:Name="BarsView" Drawable="{Binding Bars}" HeightRequest="130" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Висновок -->
+            <Border BackgroundColor="#1AC8922A" Stroke="#33C8922A" StrokeThickness="1" Padding="14,12">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="16" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{loc:Translate Insight_Title}" TextColor="{StaticResource GoldLight}"
+                           FontFamily="DMSansBold" FontSize="12" />
+                    <Label Text="{Binding InsightText}" FontSize="12" LineHeight="1.35" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Теплова карта -->
+            <Border Style="{StaticResource CardBorder}" Padding="14">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="{loc:Translate Chart_Heatmap}" Style="{StaticResource SectionLabel}" />
+                    <GraphicsView x:Name="HeatmapView" Drawable="{Binding Heatmap}" HeightRequest="140" />
+                    <HorizontalStackLayout Spacing="5" HorizontalOptions="End">
+                        <Label Text="{loc:Translate Legend_Less}" Style="{StaticResource CaptionLabel}" FontSize="9" VerticalOptions="Center" />
+                        <BoxView WidthRequest="10" HeightRequest="10" CornerRadius="3" Color="#1A2540" />
+                        <BoxView WidthRequest="10" HeightRequest="10" CornerRadius="3" Color="#40C8922A" />
+                        <BoxView WidthRequest="10" HeightRequest="10" CornerRadius="3" Color="#80C8922A" />
+                        <BoxView WidthRequest="10" HeightRequest="10" CornerRadius="3" Color="#BFC8922A" />
+                        <BoxView WidthRequest="10" HeightRequest="10" CornerRadius="3" Color="#C8922A" />
+                        <Label Text="{loc:Translate Legend_More}" Style="{StaticResource CaptionLabel}" FontSize="9" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Розподіл за категоріями -->
+            <Border Style="{StaticResource CardBorder}" Padding="14">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="{loc:Translate Chart_Categories}" Style="{StaticResource SectionLabel}" />
+                    <Label Text="{loc:Translate Chart_Empty}" Style="{StaticResource SubtitleLabel}"
+                           IsVisible="{Binding HasCategories, Converter={StaticResource InvertedBoolConverter}}" />
+                    <Grid ColumnDefinitions="110,*" ColumnSpacing="16" IsVisible="{Binding HasCategories}">
+                        <GraphicsView x:Name="DonutView" Drawable="{Binding Donut}" WidthRequest="110" HeightRequest="110" />
+                        <VerticalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center"
+                                             BindableLayout.ItemsSource="{Binding Legend}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="models:LegendItem">
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                        <BoxView WidthRequest="8" HeightRequest="8" CornerRadius="4"
+                                                 Color="{Binding Color}" VerticalOptions="Center" />
+                                        <Label Grid.Column="1" Text="{Binding Name}" Style="{StaticResource SubtitleLabel}"
+                                               FontSize="12" LineBreakMode="TailTruncation" />
+                                        <Label Grid.Column="2" Text="{Binding PercentText}" FontFamily="DMSansBold" FontSize="12" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Експорт звіту -->
+            <Button Text="{loc:Translate Btn_Export}" Style="{StaticResource SecondaryButton}" HeightRequest="48"
+                    Command="{Binding ExportCommand}" />
+            <Label Text="{Binding ExportMessage}" TextColor="{StaticResource Red}" HorizontalTextAlignment="Center"
+                   IsVisible="{Binding ExportMessage, Converter={StaticResource StringToBoolConverter}}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

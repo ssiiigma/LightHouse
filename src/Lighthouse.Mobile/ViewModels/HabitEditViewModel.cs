@@ -176,7 +176,7 @@ public sealed partial class HabitEditViewModel(IHabitSvc habits, LocalizationSer
     [RelayCommand]
     private async Task DeleteAsync()
     {
-        var confirmed = await Shell.Current.DisplayAlert(
+        var confirmed = await Shell.Current.DisplayAlertAsync(
             loc["Habit_DeleteTitle"], loc["Habit_DeleteConfirm"], loc["Btn_Delete"], loc["Btn_Cancel"]);
         if (!confirmed)
         {

@@ -102,7 +102,8 @@ public sealed class LighthouseSceneDrawable : IDrawable
 
     private static void DrawSky(ICanvas canvas, RectF rect)
     {
-        var sky = new LinearGradientPaint
+        canvas.SaveState();
+        canvas.SetFillPaint(new LinearGradientPaint
         {
             StartPoint = new Point(0.5, 0),
             EndPoint = new Point(0.5, 1),
@@ -112,28 +113,32 @@ public sealed class LighthouseSceneDrawable : IDrawable
                 new PaintGradientStop(0.55f, Deep),
                 new PaintGradientStop(1f, Color.FromArgb("#1E4470"))
             ]
-        };
-        canvas.SetFillPaint(sky, rect);
+        }, rect);
         canvas.FillRectangle(rect);
+        canvas.RestoreState();
     }
 
     private static void DrawStars(ICanvas canvas, RectF rect, float seaTop, float t, float u)
     {
-        var skyHeight = seaTop - 12f * u; // зірки по всьому небу, до самого горизонту
+        var skyHeight = seaTop - 12f * u; // зірки по всьому небу, до горизонту
+        var scale = Math.Max(u, 1f);
         foreach (var star in Stars)
         {
             var alpha = star.BaseAlpha;
             if (star.Twinkles)
             {
-                // Плавне наростання й повільне затухання.
-                alpha *= 0.15f + 0.85f * (0.5f + 0.5f * MathF.Sin(t * star.Speed + star.Phase));
+                alpha *= 0.2f + 0.8f * (0.5f + 0.5f * MathF.Sin(t * star.Speed + star.Phase));
             }
 
-            canvas.FillColor = Colors.White.WithAlpha(alpha);
-            canvas.FillCircle(
-                rect.X + star.X * rect.Width,
-                rect.Y + star.Y * skyHeight,
-                star.Radius * Math.Max(u, 0.8f));
+            var radius = (1.0f + star.Radius) * scale;
+            var x = rect.X + star.X * rect.Width - radius;
+            var y = rect.Y + star.Y * skyHeight - radius;
+            var bounds = new RectF(x, y, radius * 2f, radius * 2f);
+
+            canvas.SaveState();
+            canvas.SetFillPaint(new SolidPaint(Colors.White.WithAlpha(alpha)), bounds);
+            canvas.FillEllipse(bounds);
+            canvas.RestoreState();
         }
     }
 

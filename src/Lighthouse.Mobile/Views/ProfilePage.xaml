@@ -6,6 +6,7 @@
              xmlns:loc="clr-namespace:Lighthouse.Mobile.Localization"
              x:Class="Lighthouse.Mobile.Views.ProfilePage"
              x:DataType="vm:ProfileViewModel"
+             Style="{StaticResource TabPageStyle}"
              Shell.NavBarIsVisible="False">
 
     <ScrollView>

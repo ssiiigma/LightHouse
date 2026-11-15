@@ -16,6 +16,8 @@
                       ContentTemplate="{DataTemplate views:TasksPage}" />
         <ShellContent x:Name="HabitsTab" Route="habits" Icon="tab_habits.png"
                       ContentTemplate="{DataTemplate views:HabitsPage}" />
+        <ShellContent x:Name="AnalyticsTab" Route="analytics" Icon="tab_analytics.png"
+                      ContentTemplate="{DataTemplate views:AnalyticsPage}" />
         <ShellContent x:Name="ProfileTab" Route="profile" Icon="tab_profile.png"
                       ContentTemplate="{DataTemplate views:ProfilePage}" />
     </TabBar>

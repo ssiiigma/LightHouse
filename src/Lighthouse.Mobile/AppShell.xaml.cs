@@ -21,6 +21,7 @@ public partial class AppShell : Shell
         var loc = LocalizationService.Instance;
         TasksTab.Title = loc["Tab_Tasks"];
         ProfileTab.Title = loc["Tab_Profile"];
+        AnalyticsTab.Title = loc["Tab_Analytics"];
         HabitsTab.Title = loc["Tab_Habits"];
     }
 }

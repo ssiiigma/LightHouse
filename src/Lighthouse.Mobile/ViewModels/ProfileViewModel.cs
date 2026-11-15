@@ -53,7 +53,7 @@ public sealed partial class ProfileViewModel(IAuth auth, ISyncSvc sync, Localiza
         var pending = await sync.GetPendingCountAsync();
         if (pending > 0)
         {
-            var confirmed = await Shell.Current.DisplayAlert(
+            var confirmed = await Shell.Current.DisplayAlertAsync(
                 loc["SignOut_Title"], loc.Get("SignOut_Pending", pending),
                 loc["Btn_SignOutConfirm"], loc["Btn_Cancel"]);
             if (!confirmed) return;

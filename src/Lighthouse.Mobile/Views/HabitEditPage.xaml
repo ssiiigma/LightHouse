@@ -6,6 +6,7 @@
              xmlns:conv="clr-namespace:Lighthouse.Mobile.Converters"
              xmlns:loc="clr-namespace:Lighthouse.Mobile.Localization"
              xmlns:enums="clr-namespace:Lighthouse.Shared.Enums;assembly=Lighthouse.Shared"
+             xmlns:controls="clr-namespace:Lighthouse.Mobile.Controls"
              x:Class="Lighthouse.Mobile.Views.HabitEditPage"
              x:DataType="vm:HabitEditViewModel"
              Shell.NavBarIsVisible="False">
@@ -149,6 +150,7 @@
                             <Switch Grid.Column="1" IsToggled="{Binding HasReminder}" />
                         </Grid>
                         <TimePicker Time="{Binding ReminderTime}" IsVisible="{Binding HasReminder}" />
+                        <controls:TimeInputView Time="{Binding ReminderTime}" IsVisible="{Binding HasReminder}" HorizontalOptions="Start" />
                     </VerticalStackLayout>
                 </Border>
 

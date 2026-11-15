@@ -16,6 +16,7 @@ public interface IApiClient
     Task<AuthResponse> LoginAsync(string email, string password, CancellationToken ct);
     Task LogoutAsync(string refreshToken, CancellationToken ct);
     Task<TResponse> GetAsync<TResponse>(string path, CancellationToken ct);
+    Task<byte[]> GetBytesAsync(string path, CancellationToken ct);
     Task<TResponse> PutAsync<TRequest, TResponse>(string path, TRequest body, CancellationToken ct);
     Task DeleteAsync(string path, CancellationToken ct);
 }
@@ -80,6 +81,13 @@ public sealed class ApiClient(HttpClient http, ISecureStore secureStore) : IApiC
                       ?? throw new ApiException(HttpStatusCode.Unauthorized, "Session expired.");
 
         return await SendWithTokenAsync(requestFactory(), renewed, ct);
+    }
+    
+    public async Task<byte[]> GetBytesAsync(string path, CancellationToken ct)
+    {
+        using var response = await SendAsync(() => new HttpRequestMessage(HttpMethod.Get, path), ct);
+        await EnsureSuccessAsync(response, ct);
+        return await response.Content.ReadAsByteArrayAsync(ct);
     }
 
     private async Task<string?> RefreshAsync(string failedAccessToken, CancellationToken ct)

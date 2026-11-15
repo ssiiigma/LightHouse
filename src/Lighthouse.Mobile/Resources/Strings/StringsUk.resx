@@ -104,4 +104,38 @@
     <data name="Habit_DeleteConfirm" xml:space="preserve"><value>Видалити звичку разом з усіма відмітками?</value></data>
     <data name="Err_HabitDays" xml:space="preserve"><value>Оберіть хоча б один день.</value></data>
     <data name="Err_HabitTimes" xml:space="preserve"><value>Кількість разів на тиждень — від 1 до 7.</value></data>
+    <data name="Tab_Analytics" xml:space="preserve"><value>Аналітика</value></data>
+    <data name="Analytics_Label" xml:space="preserve"><value>Ваш прогрес</value></data>
+    <data name="Analytics_Title" xml:space="preserve"><value>Аналітика</value></data>
+    <data name="Period_Day" xml:space="preserve"><value>День</value></data>
+    <data name="Period_Week" xml:space="preserve"><value>Тиждень</value></data>
+    <data name="Period_Month" xml:space="preserve"><value>Місяць</value></data>
+    <data name="Period_Year" xml:space="preserve"><value>Рік</value></data>
+    <data name="Cmp_Day" xml:space="preserve"><value>проти вчора</value></data>
+    <data name="Cmp_Week" xml:space="preserve"><value>проти минулого тижня</value></data>
+    <data name="Cmp_Month" xml:space="preserve"><value>проти минулого місяця</value></data>
+    <data name="Cmp_Year" xml:space="preserve"><value>проти минулого року</value></data>
+    <data name="Unit_Pp" xml:space="preserve"><value>п.п.</value></data>
+    <data name="Delta_New" xml:space="preserve"><value>нове</value></data>
+    <data name="Kpi_Rate" xml:space="preserve"><value>Виконання завдань</value></data>
+    <data name="Kpi_Completed" xml:space="preserve"><value>Виконано завдань</value></data>
+    <data name="Kpi_Habits" xml:space="preserve"><value>Регулярність звичок</value></data>
+    <data name="Kpi_Streak" xml:space="preserve"><value>Серія звичок, дн.</value></data>
+    <data name="Kpi_Record" xml:space="preserve"><value>Рекорд: {0}</value></data>
+    <data name="Chart_Tasks" xml:space="preserve"><value>Виконані завдання</value></data>
+    <data name="Chart_Heatmap" xml:space="preserve"><value>Теплова карта активності</value></data>
+    <data name="Chart_Categories" xml:space="preserve"><value>Розподіл за категоріями</value></data>
+    <data name="Chart_Empty" xml:space="preserve"><value>За цей період виконаних завдань ще немає.</value></data>
+    <data name="Cat_None" xml:space="preserve"><value>Без категорії</value></data>
+    <data name="Cat_Other" xml:space="preserve"><value>Інше</value></data>
+    <data name="Insight_Title" xml:space="preserve"><value>Lighthouse помічає</value></data>
+    <data name="Insight_Template" xml:space="preserve"><value>Найпродуктивніший день — {0}, найактивніший час — {1}.</value></data>
+    <data name="Insight_NoData" xml:space="preserve"><value>Поки замало даних для висновків: виконайте щонайменше 5 завдань.</value></data>
+    <data name="Legend_Less" xml:space="preserve"><value>Менше</value></data>
+    <data name="Legend_More" xml:space="preserve"><value>Більше</value></data>
+    <data name="Btn_Export" xml:space="preserve"><value>Експорт звіту</value></data>
+    <data name="Export_Title" xml:space="preserve"><value>Звіт</value></data>
+    <data name="Export_NoNetwork" xml:space="preserve"><value>Для експорту потрібне з'єднання з мережею.</value></data>
+    <data name="Export_Timeout" xml:space="preserve"><value>Сервер не відповів вчасно. Спробуйте пізніше.</value></data>
+    <data name="Export_Failed" xml:space="preserve"><value>Не вдалося сформувати звіт. Спробуйте пізніше.</value></data>
 </root>
