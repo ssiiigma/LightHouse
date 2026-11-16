@@ -155,7 +155,9 @@
     <data name="Advice_Defer_Detail" xml:space="preserve"><value>Your daily limit is {0} tasks. You can move these to the next day: {1}.</value></data>
     <data name="Advice_Fit_Title" xml:space="preserve"><value>Not enough time before the deadline</value></data>
     <data name="Advice_Fit_Detail" xml:space="preserve"><value>These don't fit the time before their deadline: {0}. Change the deadline or the estimate, or split the task into subtasks.</value></data>
-    <data name="Reason_priority" xml:space="preserve"><value>high task priority</value></data>
+    <data name="Reason_priority_critical" xml:space="preserve"><value>critical task priority</value></data>
+    <data name="Reason_priority_high" xml:space="preserve"><value>high task priority</value></data>
+    <data name="Reason_priority_medium" xml:space="preserve"><value>medium task priority</value></data>
     <data name="Reason_overdue" xml:space="preserve"><value>the task is already overdue</value></data>
     <data name="Reason_deadline_within_day" xml:space="preserve"><value>less than a day until the deadline</value></data>
     <data name="Reason_deadline_approaching" xml:space="preserve"><value>the deadline is approaching</value></data>
@@ -165,4 +167,13 @@
     <data name="Reason_usual_category" xml:space="preserve"><value>you usually complete tasks of this category</value></data>
     <data name="Reason_postponed" xml:space="preserve"><value>the task has been postponed before</value></data>
     <data name="Reason_has_reminder" xml:space="preserve"><value>a reminder is set for the task</value></data>
+    <data name="Sync_Title" xml:space="preserve"><value>Synchronization</value></data>
+    <data name="Sync_Now" xml:space="preserve"><value>Sync now</value></data>
+    <data name="Sync_Retry" xml:space="preserve"><value>Retry rejected changes</value></data>
+    <data name="Sync_Never" xml:space="preserve"><value>never</value></data>
+    <data name="Sync_AllSynced" xml:space="preserve"><value>Everything is synced · {0}</value></data>
+    <data name="Sync_Waiting" xml:space="preserve"><value>Changes waiting to upload: {0} · last sync: {1}</value></data>
+    <data name="Sync_Parked" xml:space="preserve"><value>Changes that could not be uploaded: {0}.</value></data>
+    <data name="Sync_Full" xml:space="preserve"><value>Re-download everything from the server</value></data>
+    <data name="Tasks_NoActive" xml:space="preserve"><value>No active tasks. Completed earlier: {0}.</value></data>
 </root>

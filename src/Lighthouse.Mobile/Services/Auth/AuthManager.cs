@@ -122,13 +122,23 @@ public sealed class AuthManager : IAuth
         Preferences.Default.Set(PreferenceKeys.UserName, auth.User.Name);
         Preferences.Default.Set(PreferenceKeys.UserEmail, auth.User.Email);
         await _secureStore.SaveAsync(auth.AccessToken, auth.RefreshToken);
+        try
+        {
+            using var limit = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+            await _sync.SyncNowAsync(limit.Token);
+        }
+        catch (Exception)
+        {
+            // Помилку покаже екран синхронізації; вхід від цього не залежить.
+        }
+
         _sync.Start();
     }
 
     private async Task ClearLocalDataAsync()
     {
         await _localDb.ClearAllAsync();
-        SyncCursor.ClearAll();
+        SyncCursor.ClearLegacy();
         Preferences.Default.Remove(PreferenceKeys.UserId);
         Preferences.Default.Remove(PreferenceKeys.UserName);
         Preferences.Default.Remove(PreferenceKeys.UserEmail);

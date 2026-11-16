@@ -155,7 +155,9 @@
     <data name="Advice_Defer_Detail" xml:space="preserve"><value>Ваш денний ліміт — {0} завдань. Можна перенести на наступну добу: {1}.</value></data>
     <data name="Advice_Fit_Title" xml:space="preserve"><value>Не вистачає часу до дедлайну</value></data>
     <data name="Advice_Fit_Detail" xml:space="preserve"><value>Не вкладаються в час до дедлайну: {0}. Змініть дедлайн чи оцінку тривалості або розбийте завдання на підзавдання.</value></data>
-    <data name="Reason_priority" xml:space="preserve"><value>високий пріоритет завдання</value></data>
+    <data name="Reason_priority_critical" xml:space="preserve"><value>критичний пріоритет завдання</value></data>
+    <data name="Reason_priority_high" xml:space="preserve"><value>високий пріоритет завдання</value></data>
+    <data name="Reason_priority_medium" xml:space="preserve"><value>середній пріоритет завдання</value></data>
     <data name="Reason_overdue" xml:space="preserve"><value>завдання вже прострочене</value></data>
     <data name="Reason_deadline_within_day" xml:space="preserve"><value>до дедлайну менше доби</value></data>
     <data name="Reason_deadline_approaching" xml:space="preserve"><value>дедлайн наближається</value></data>
@@ -165,4 +167,13 @@
     <data name="Reason_usual_category" xml:space="preserve"><value>завдання цієї категорії ви зазвичай виконуєте</value></data>
     <data name="Reason_postponed" xml:space="preserve"><value>завдання вже відкладалось</value></data>
     <data name="Reason_has_reminder" xml:space="preserve"><value>для завдання налаштовано нагадування</value></data>
+    <data name="Sync_Title" xml:space="preserve"><value>Синхронізація</value></data>
+    <data name="Sync_Now" xml:space="preserve"><value>Синхронізувати зараз</value></data>
+    <data name="Sync_Retry" xml:space="preserve"><value>Повторити відхилені зміни</value></data>
+    <data name="Sync_Never" xml:space="preserve"><value>ще не було</value></data>
+    <data name="Sync_AllSynced" xml:space="preserve"><value>Усе синхронізовано · {0}</value></data>
+    <data name="Sync_Waiting" xml:space="preserve"><value>Очікують надсилання змін: {0} · остання синхронізація: {1}</value></data>
+    <data name="Sync_Parked" xml:space="preserve"><value>Не вдалося надіслати змін: {0}.</value></data>
+    <data name="Sync_Full" xml:space="preserve"><value>Завантажити все з сервера заново</value></data>
+    <data name="Tasks_NoActive" xml:space="preserve"><value>Активних завдань немає. Виконаних раніше: {0}.</value></data>
 </root>

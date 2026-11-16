@@ -1,5 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
+using Lighthouse.Mobile.Data;
+using SQLite;
 
 namespace Lighthouse.Mobile.Infrastructure;
 
@@ -42,27 +44,38 @@ public static class PreferenceKeys
     public const string TimeZoneSent = "profile.timezone.sent";
 }
 
-/// <summary>Курсор дельта-синхронізації (максимальний ServerModifiedAtUtc отриманих записів) у Preferences.</summary>
+/// <summary>
+/// Курсор дельта-синхронізації (максимальний ServerModifiedAtUtc отриманих записів). Лежить у SQLite й оновлюється
+/// в одній транзакції з даними: втрата чи відкат бази автоматично скидає курсор, тож пропущених записів не буде.
+/// </summary>
 internal static class SyncCursor
 {
-    private static string Key(string entityType) => $"sync.cursor.{entityType}";
+    private static string Key(string entityType) => $"cursor.{entityType}";
 
-    public static DateTime? Load(string entityType)
+    public static async Task<DateTime?> LoadAsync(SQLiteAsyncConnection db, string entityType)
     {
-        var text = Preferences.Default.Get(Key(entityType), string.Empty);
-        return DateTime.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var value)
+        var row = await db.FindAsync<SyncMeta>(Key(entityType));
+        return row is not null
+               && DateTime.TryParse(row.Value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var value)
             ? Utc.Ensure(value)
             : null;
     }
 
-    public static void Save(string entityType, DateTime value) =>
-        Preferences.Default.Set(Key(entityType), Utc.Ensure(value).ToString("O", CultureInfo.InvariantCulture));
+    public static void Save(SQLiteConnection tx, string entityType, DateTime value) =>
+        tx.InsertOrReplace(new SyncMeta
+        {
+            Key = Key(entityType),
+            Value = Utc.Ensure(value).ToString("O", CultureInfo.InvariantCulture)
+        });
 
-    public static void ClearAll()
+    public static Task ResetAsync(SQLiteAsyncConnection db) => db.DeleteAllAsync<SyncMeta>();
+
+    /// <summary>Старе сховище курсора (Preferences) більше не використовується.</summary>
+    public static void ClearLegacy()
     {
         foreach (var entityType in EntityTypes.All)
         {
-            Preferences.Default.Remove(Key(entityType));
+            Preferences.Default.Remove($"sync.cursor.{entityType}");
         }
     }
 }

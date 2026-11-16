@@ -4,11 +4,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:Lighthouse.Mobile.ViewModels"
              xmlns:loc="clr-namespace:Lighthouse.Mobile.Localization"
+             xmlns:conv="clr-namespace:Lighthouse.Mobile.Converters"
              x:Class="Lighthouse.Mobile.Views.ProfilePage"
              x:DataType="vm:ProfileViewModel"
              Style="{StaticResource TabPageStyle}"
              Shell.NavBarIsVisible="False">
 
+    <ContentPage.Resources>
+        <conv:StringToBoolConverter x:Key="StringToBoolConverter" />
+    </ContentPage.Resources>
+    
     <ScrollView>
         <VerticalStackLayout Padding="20,56,20,24" Spacing="14">
 
@@ -59,6 +64,21 @@
                         </Button.Triggers>
                     </Button>
                 </Grid>
+            </Border>
+            
+            <Label Text="{loc:Translate Sync_Title}" Style="{StaticResource SectionLabel}" Margin="0,8,0,0" />
+            <Border Style="{StaticResource CardBorder}" Padding="16,14">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding SyncSummary}" FontFamily="DMSansMedium" FontSize="13" />
+                    <Label Text="{Binding SyncDetail}" Style="{StaticResource CaptionLabel}"
+                           IsVisible="{Binding SyncDetail, Converter={StaticResource StringToBoolConverter}}" />
+                    <Button Text="{loc:Translate Sync_Now}" Command="{Binding SyncNowCommand}"
+                            Style="{StaticResource GhostButton}" HorizontalOptions="Start" />
+                    <Button Text="{loc:Translate Sync_Full}" Command="{Binding FullResyncCommand}"
+                            Style="{StaticResource GhostButton}" HorizontalOptions="Start" />
+                    <Button Text="{loc:Translate Sync_Retry}" Command="{Binding RetryParkedCommand}"
+                            IsVisible="{Binding HasParked}" Style="{StaticResource GhostButton}" HorizontalOptions="Start" />
+                </VerticalStackLayout>
             </Border>
 
             <Button Text="{loc:Translate Btn_SignOut}" Style="{StaticResource DangerButton}" Margin="0,20,0,0"

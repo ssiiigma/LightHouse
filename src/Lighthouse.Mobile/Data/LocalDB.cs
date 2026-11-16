@@ -42,6 +42,7 @@ public sealed class LocalDB : ILocalDB
                 await connection.CreateTableAsync<LocalHabitLog>();
                 await connection.CreateTableAsync<OutboxItem>();
                 await connection.CreateTableAsync<RankingCache>();
+                await connection.CreateTableAsync<SyncMeta>();
                 _connection = connection;
             }
 
@@ -65,6 +66,7 @@ public sealed class LocalDB : ILocalDB
             tx.DeleteAll<LocalHabit>();
             tx.DeleteAll<OutboxItem>();
             tx.DeleteAll<RankingCache>();
+            tx.DeleteAll<SyncMeta>();
         });
     }
 }

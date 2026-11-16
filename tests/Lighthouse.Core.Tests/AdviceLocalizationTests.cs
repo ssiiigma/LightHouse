@@ -8,8 +8,8 @@ public class AdviceLocalizationTests
 {
     private static readonly string[] ReasonCodes =
     [
-        "priority", "overdue", "deadline_within_day", "deadline_approaching", "duration",
-        "usual_time", "usual_weekday", "usual_category", "postponed", "has_reminder"
+        "priority_critical", "priority_high", "priority_medium", "overdue", "deadline_within_day", 
+        "deadline_approaching", "duration", "usual_time", "usual_weekday", "usual_category", "postponed", "has_reminder"
     ];
 
     private static HashSet<string> Keys(string file)

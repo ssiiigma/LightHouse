@@ -43,33 +43,16 @@ public sealed class TaskSyncHandler(IApiClient api, ILocalDB localDb) : IEntityS
 
     public async Task<int> PullAsync(CancellationToken ct)
     {
-        var cursor = SyncCursor.Load(EntityType);
+        var db = await localDb.GetConnectionAsync();
+        var cursor = await SyncCursor.LoadAsync(db, EntityType);
         var path = cursor is { } since
             ? "api/tasks?modifiedSince=" + Uri.EscapeDataString(
                 since.AddSeconds(-CursorOverlapSeconds).ToString("O", CultureInfo.InvariantCulture))
             : "api/tasks";
 
         var items = await api.GetAsync<List<TaskDto>>(path, ct);
-        if (items.Count == 0)
-        {
-            return 0;
-        }
-
-        var db = await localDb.GetConnectionAsync();
-        var applied = 0;
-        await db.RunInTransactionAsync(tx =>
-        {
-            foreach (var dto in items)
-            {
-                if (ApplyRemote(tx, dto, force: false))
-                {
-                    applied++;
-                }
-            }
-        });
-
-        SyncCursor.Save(EntityType, items.Max(i => i.ServerModifiedAtUtc));
-        return applied;
+        return await PullHelper.ApplyAsync(db, EntityType, items,
+            (tx, dto) => ApplyRemote(tx, dto, force: false), d => d.ServerModifiedAtUtc);
     }
 
     public async Task MarkFailedAsync(OutboxItem item)

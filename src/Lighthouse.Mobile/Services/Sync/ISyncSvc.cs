@@ -33,4 +33,15 @@ public interface ISyncSvc
 
     /// <summary>Кількість ще не надісланих змін.</summary>
     Task<int> GetPendingCountAsync();
+    
+    public sealed record SyncDiagnostics(int Pending, int Parked, DateTime? LastSuccessUtc, string? LastError);
+    
+    /// <summary>Скільки змін чекає надсилання, скільки відхилено сервером чи відкладено, коли востаннє вдалось і яка остання помилка.</summary>
+    Task<SyncDiagnostics> GetDiagnosticsAsync();
+
+    /// <summary>Дає відкладеним змінам нову спробу й запускає синхронізацію.</summary>
+    Task RetryParkedAsync();
+    
+    /// <summary>Скидає курсори й завантажує всі дані з сервера заново (незавершені локальні зміни зберігаються).</summary>
+    Task<bool> FullResyncAsync();
 }

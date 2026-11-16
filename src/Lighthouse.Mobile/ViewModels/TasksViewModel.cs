@@ -23,8 +23,14 @@ public sealed partial class TasksViewModel(
     ITaskSvc tasks, ISyncSvc sync, IAuth auth, LocalizationService loc, AdviceBannerViewModel banner)
     : ObservableObject
 {
+    /// <summary>
+    /// Серіалізує перезавантаження списку: події Changed/DataChanged можуть надходити майже одночасно,
+    /// і без черги старіший запуск, що завершився пізніше, перезаписав би результат новішого.
+    /// </summary>
+    private readonly SemaphoreSlim _loadGate = new(1, 1);
+
     public AdviceBannerViewModel Banner => banner;
-    
+
     [ObservableProperty]
     private bool _isRefreshing;
 
@@ -39,6 +45,13 @@ public sealed partial class TasksViewModel(
 
     [ObservableProperty]
     private double _progress;
+
+    /// <summary>
+    /// Текст порожнього стану: відрізняє «завдань немає взагалі» від «усі завдання виконані раніше
+    /// й тому приховані зі списку на сьогодні».
+    /// </summary>
+    [ObservableProperty]
+    private string _emptyText = string.Empty;
 
     public ObservableCollection<TaskGroup> Groups { get; } = [];
 
@@ -91,7 +104,21 @@ public sealed partial class TasksViewModel(
         }
     }
 
+    /// <summary>Перечитує завдання з локальної БД. Виклики виконуються по черзі.</summary>
     private async Task LoadAsync()
+    {
+        await _loadGate.WaitAsync();
+        try
+        {
+            await LoadCoreAsync();
+        }
+        finally
+        {
+            _loadGate.Release();
+        }
+    }
+
+    private async Task LoadCoreAsync()
     {
         var culture = CultureInfo.CurrentCulture;
         var now = DateTime.Now;
@@ -105,7 +132,7 @@ public sealed partial class TasksViewModel(
 
         // Денний прогрес: завдання з дедлайном до кінця сьогодні (разом із простроченими) + виконані сьогодні.
         var visible = new List<TaskModel>();
-        int done = 0, planned = 0;
+        int done = 0, planned = 0, hiddenCompleted = 0;
         foreach (var task in all)
         {
             DateTime? completed = task.CompletedAtUtc is { } c ? ToLocal(c) : null;
@@ -115,13 +142,14 @@ public sealed partial class TasksViewModel(
             {
                 if (completedLocal.Date != today)
                 {
-                    continue; // старі виконані не показуємо (лишаються в аналітиці)
+                    hiddenCompleted++; // старі виконані не показуємо (лишаються в аналітиці)
+                    continue;
                 }
 
                 done++;
                 planned++;
             }
-            else if (deadline is { } due && due < endOfToday)
+            else if (deadline is null || deadline.Value < endOfToday)
             {
                 planned++;
             }
@@ -140,6 +168,10 @@ public sealed partial class TasksViewModel(
         AddGroup("Group_Critical", "#E05C5C", ordered.Where(t => t.Priority == TaskPriority.Critical));
         AddGroup("Group_High", "#E8A23A", ordered.Where(t => t.Priority == TaskPriority.High));
         AddGroup("Group_Normal", "#5B9BD5", ordered.Where(t => t.Priority is TaskPriority.Medium or TaskPriority.Low));
+
+        EmptyText = hiddenCompleted > 0
+            ? loc.Get("Tasks_NoActive", hiddenCompleted)
+            : loc["Tasks_Empty"];
 
         Progress = planned == 0 ? 0 : (double)done / planned;
         ProgressText = $"{done} / {planned}";
@@ -209,11 +241,28 @@ public sealed partial class TasksViewModel(
         await Shell.Current.GoToAsync("//welcome");
     });
 
-    private void UpdateStatus(SyncStatus status) => StatusText = status switch
+    private void UpdateStatus(SyncStatus status)
     {
-        SyncStatus.Syncing => loc["Sync_Syncing"],
-        SyncStatus.Offline => loc["Sync_Offline"],
-        SyncStatus.Error => loc["Sync_Error"],
-        _ => string.Empty
-    };
+        StatusText = status switch
+        {
+            SyncStatus.Syncing => loc["Sync_Syncing"],
+            SyncStatus.Offline => loc["Sync_Offline"],
+            SyncStatus.Error => loc["Sync_Error"],
+            _ => string.Empty
+        };
+
+        if (status == SyncStatus.Error)
+        {
+            _ = ShowErrorDetailAsync();
+        }
+    }
+
+    private async Task ShowErrorDetailAsync()
+    {
+        var diagnostics = await sync.GetDiagnosticsAsync();
+        if (diagnostics.LastError is { } error)
+        {
+            MainThread.BeginInvokeOnMainThread(() => StatusText = $"{loc["Sync_Error"]}: {error}");
+        }
+    }
 }

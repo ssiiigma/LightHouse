@@ -119,3 +119,11 @@ public sealed class LocalHabitLog
     public DateTime CompletedAtUtc { get; set; }
     public SyncState SyncState { get; set; }
 }
+
+/// <summary>Службові значення синхронізації (курсори): зберігаються в тій самій базі й транзакції, що й дані.</summary>
+[Table("SyncMeta")]
+public sealed class SyncMeta
+{
+    [PrimaryKey] public string Key { get; set; } = string.Empty;
+    public string Value { get; set; } = string.Empty;
+}

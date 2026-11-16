@@ -4,6 +4,7 @@ using Lighthouse.Mobile.Data;
 using Lighthouse.Mobile.Infrastructure;
 using Lighthouse.Mobile.Services.Api;
 using Lighthouse.Shared.Contracts.Habits;
+using Lighthouse.Shared.Contracts.Tasks;
 using Lighthouse.Shared.Sync;
 using SQLite;
 
@@ -60,33 +61,16 @@ public sealed class HabitSyncHandler(IApiClient api, ILocalDB localDb) : IEntity
 
     public async Task<int> PullAsync(CancellationToken ct)
     {
-        var cursor = SyncCursor.Load(EntityType);
+        var db = await localDb.GetConnectionAsync();
+        var cursor = await SyncCursor.LoadAsync(db, EntityType);
         var path = cursor is { } since
             ? "api/habits?modifiedSince=" + Uri.EscapeDataString(
                 since.AddSeconds(-CursorOverlapSeconds).ToString("O", CultureInfo.InvariantCulture))
             : "api/habits";
 
         var items = await api.GetAsync<List<HabitDto>>(path, ct);
-        if (items.Count == 0)
-        {
-            return 0;
-        }
-
-        var db = await localDb.GetConnectionAsync();
-        var applied = 0;
-        await db.RunInTransactionAsync(tx =>
-        {
-            foreach (var dto in items)
-            {
-                if (ApplyRemote(tx, dto, force: false))
-                {
-                    applied++;
-                }
-            }
-        });
-
-        SyncCursor.Save(EntityType, items.Max(i => i.ServerModifiedAtUtc));
-        return applied;
+        return await PullHelper.ApplyAsync(db, EntityType, items,
+            (tx, dto) => ApplyRemote(tx, dto, force: false), d => d.ServerModifiedAtUtc);
     }
 
     public async Task MarkFailedAsync(OutboxItem item)

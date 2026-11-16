@@ -1,12 +1,16 @@
 using System.Net;
+using System.Text.Json;
 using Lighthouse.Mobile.Data;
-using Microsoft.Extensions.Logging;
+using Lighthouse.Mobile.Infrastructure;
 using Lighthouse.Mobile.Services.Api;
+using Microsoft.Extensions.Logging;
 
 namespace Lighthouse.Mobile.Services.Sync;
 
 public sealed class SyncService : ISyncSvc
 {
+    private const string LastOkKey = "sync.last_ok";
+    private const string LastErrorKey = "sync.last_error";
     private const int InitialRetrySeconds = 10;
     private const int MaxRetrySeconds = 300;
     private static readonly TimeSpan Debounce = TimeSpan.FromSeconds(1);
@@ -73,7 +77,27 @@ public sealed class SyncService : ISyncSvc
         return await db.Table<OutboxItem>().CountAsync();
     }
 
-    public async Task<bool> SyncNowAsync(CancellationToken ct = default)
+    public async Task<ISyncSvc.SyncDiagnostics> GetDiagnosticsAsync()
+    {
+        var db = await _localDb.GetConnectionAsync();
+        var pending = await db.Table<OutboxItem>().Where(i => i.Attempts < OutboxStore.MaxAttempts).CountAsync();
+        var parked = await db.Table<OutboxItem>().Where(i => i.Attempts >= OutboxStore.MaxAttempts).CountAsync();
+
+        DateTime? lastOk = long.TryParse(Preferences.Default.Get(LastOkKey, string.Empty), out var ticks)
+            ? new DateTime(ticks, DateTimeKind.Utc)
+            : null;
+        var error = Preferences.Default.Get(LastErrorKey, string.Empty);
+
+        return new ISyncSvc.SyncDiagnostics(pending, parked, lastOk, error.Length == 0 ? null : error);
+    }
+
+    public async Task RetryParkedAsync()
+    {
+        await ResetParkedAsync();
+        await SyncNowAsync();
+    }
+
+        public async Task<bool> SyncNowAsync(CancellationToken ct = default)
     {
         await _gate.WaitAsync(ct);
         try
@@ -87,18 +111,53 @@ public sealed class SyncService : ISyncSvc
             SetStatus(SyncStatus.Syncing);
 
             var changed = await PushAllAsync(ct);
+
+            // Кожен тип завантажується окремо: збій одного (наприклад, звичок) не блокує решту (завдання).
+            var errors = new List<string>();
             foreach (var handler in _handlers)
             {
-                changed += await handler.PullAsync(ct);
+                try
+                {
+                    changed += await handler.PullAsync(ct);
+                }
+                catch (SyncPullException ex)
+                {
+                    changed += ex.Applied;
+                    errors.Add(ex.Message);
+                    _logger.LogWarning("Pull of {Type} partially failed: {Message}", handler.EntityType, ex.Message);
+                }
+                catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    throw;
+                }
+                catch (OperationCanceledException) when (ct.IsCancellationRequested)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    errors.Add($"{handler.EntityType}: {Trim(ex.Message)}");
+                    _logger.LogWarning(ex, "Pull of {Type} failed.", handler.EntityType);
+                }
             }
 
-            _retrySeconds = InitialRetrySeconds;
-            SetStatus(SyncStatus.Idle);
             if (changed > 0)
             {
                 DataChanged?.Invoke();
             }
 
+            if (errors.Count > 0)
+            {
+                RememberError(string.Join(" | ", errors));
+                SetStatus(SyncStatus.Error);
+                ScheduleRetry();
+                return false;
+            }
+
+            _retrySeconds = InitialRetrySeconds;
+            Preferences.Default.Set(LastOkKey, DateTime.UtcNow.Ticks.ToString());
+            Preferences.Default.Remove(LastErrorKey);
+            SetStatus(SyncStatus.Idle);
             return true;
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
@@ -109,12 +168,14 @@ public sealed class SyncService : ISyncSvc
         catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
         {
             _logger.LogWarning("Synchronization stopped: the session has expired.");
+            RememberError("Session expired");
             SetStatus(SyncStatus.Error);
             return false;
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Synchronization failed; will retry in {Seconds} s.", _retrySeconds);
+            RememberError(ex.Message);
             SetStatus(_connectivity.NetworkAccess == NetworkAccess.Internet ? SyncStatus.Error : SyncStatus.Offline);
             ScheduleRetry();
             return false;
@@ -134,8 +195,9 @@ public sealed class SyncService : ISyncSvc
         {
             ct.ThrowIfCancellationRequested();
 
-            var pending = await db.Table<OutboxItem>().Where(i => i.Attempts < OutboxStore.MaxAttempts).ToListAsync();
-            var item = pending
+            // Порядок: категорії, звички, завдання, відмітки, відгуки; всередині типу — за часом створення.
+            var queue = await db.Table<OutboxItem>().Where(i => i.Attempts < OutboxStore.MaxAttempts).ToListAsync();
+            var item = queue
                 .OrderBy(i => _handlers.FirstOrDefault(h => h.EntityType == i.EntityType)?.PullOrder ?? int.MaxValue)
                 .ThenBy(i => i.Id)
                 .FirstOrDefault();
@@ -159,21 +221,34 @@ public sealed class SyncService : ISyncSvc
             }
             catch (ApiException ex) when (IsPermanent(ex))
             {
-                // Сервер відхилив саме цю зміну (400, 404, 409...): не блокуємо чергу, змінa лишається на пристрої.
+                // Сервер відхилив саме цю зміну (400, 404, 409...): не блокуємо чергу, зміна лишається на пристрої.
                 _logger.LogWarning("Server rejected {Type} {Id}: {Status}.", item.EntityType, item.EntityId, ex.StatusCode);
-                item.Attempts = OutboxStore.MaxAttempts;
-                item.LastError = ex.Message;
-                await db.UpdateAsync(item);
-                await handler.MarkFailedAsync(item);
+                await ParkAsync(db, handler, item, $"{(int)ex.StatusCode}: {Trim(ex.Message)}");
             }
             catch (ApiException ex) when ((int)ex.StatusCode >= 500)
             {
                 item.Attempts++;
-                item.LastError = ex.Message;
+                item.LastError = Trim(ex.Message);
                 await db.UpdateAsync(item);
                 throw;
             }
+            catch (Exception ex) when (IsPoison(ex))
+            {
+                // «Отруйний» елемент (пошкоджені дані черги, помилка обробки): його не вдасться надіслати ніколи,
+                // тому він відкладається, а решта черги продовжує надсилатись.
+                _logger.LogError(ex, "Outbox item {Type} {Id} cannot be processed.", item.EntityType, item.EntityId);
+                await ParkAsync(db, handler, item, $"{ex.GetType().Name}: {Trim(ex.Message)}");
+            }
         }
+    }
+
+    private static async Task ParkAsync(
+        SQLite.SQLiteAsyncConnection db, IEntitySyncHandler handler, OutboxItem item, string error)
+    {
+        item.Attempts = OutboxStore.MaxAttempts;
+        item.LastError = error;
+        await db.UpdateAsync(item);
+        await handler.MarkFailedAsync(item);
     }
 
     /// <summary>Помилки 4xx, повторення яких нічого не змінить (крім 401 — потрібен вхід, 408 і 429 — тимчасові).</summary>
@@ -181,7 +256,11 @@ public sealed class SyncService : ISyncSvc
         (int)ex.StatusCode is >= 400 and < 500
         && ex.StatusCode is not (HttpStatusCode.Unauthorized or HttpStatusCode.RequestTimeout or (HttpStatusCode)429);
 
-    /// <summary>При запуску даємо відхиленим раніше змінам ще одну спробу.</summary>
+    private static bool IsPoison(Exception ex) =>
+        ex is JsonException or InvalidOperationException or ArgumentException or FormatException
+            or NullReferenceException or KeyNotFoundException;
+
+    /// <summary>При запуску й за командою користувача відкладеним змінам даємо ще одну спробу.</summary>
     private async Task ResetParkedAsync()
     {
         var db = await _localDb.GetConnectionAsync();
@@ -233,6 +312,10 @@ public sealed class SyncService : ISyncSvc
 
     private void CancelScheduled() => Interlocked.Exchange(ref _scheduled, null)?.Cancel();
 
+    private static void RememberError(string message) => Preferences.Default.Set(LastErrorKey, Trim(message));
+
+    private static string Trim(string text) => text.Length <= 160 ? text : text[..160];
+
     private void SetStatus(SyncStatus status)
     {
         if (Status == status)
@@ -242,5 +325,12 @@ public sealed class SyncService : ISyncSvc
 
         Status = status;
         StatusChanged?.Invoke(status);
+    }
+    
+    public async Task<bool> FullResyncAsync()
+    {
+        var db = await _localDb.GetConnectionAsync();
+        await SyncCursor.ResetAsync(db);
+        return await SyncNowAsync();
     }
 }

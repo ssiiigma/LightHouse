@@ -22,7 +22,7 @@ namespace Lighthouse.Mobile.Services.AI;
 /// <summary>Рекомендації: ранжування сервера (за наявності мережі) або офлайн-евристика, поради щодо часу, відгук для моделі.</summary>
 public interface IAIClient
 {
-    /// <summary>Поради за пріоритетом показу: «почніть із», зміна часу нагадування, ліміти доби.</summary>
+    /// <summary>Поради за пріоритетом показу: «почніть із» (лише неочевидне), зміна часу нагадування, ліміти доби.</summary>
     Task<IReadOnlyList<AdviceItem>> GetAdviceAsync(CancellationToken ct);
 
     /// <summary>Користувач відповів на пораду: прийнято/застосовано або відхилено/сховано.</summary>
@@ -33,10 +33,10 @@ public sealed class AIClientService(
     ILocalDB localDb, IApiClient api, IConnectivity connectivity, ISyncSvc sync,
     LocalizationService loc, ILogger<AIClientService> logger) : IAIClient
 {
-    private const int TopCandidates = 3;
     private static readonly TimeSpan SuppressionShort = TimeSpan.FromHours(12);
     private static readonly TimeSpan SuppressionLong = TimeSpan.FromDays(7);
     private static readonly TimeSpan KeyLifetime = TimeSpan.FromDays(13);
+    private static readonly TimeSpan ServerTimeout = TimeSpan.FromSeconds(4);
 
     public async Task<IReadOnlyList<AdviceItem>> GetAdviceAsync(CancellationToken ct)
     {
@@ -48,10 +48,15 @@ public sealed class AIClientService(
             .Select(t => ToLocal(t.CompletedAtUtc!.Value))
             .ToList();
 
-        var ranking = await TryGetRankingAsync(db, ct);
+        // Сервер бачить лише надіслані зміни: поки на пристрої є непереслані, радимо за локальними даними.
+        var hasPending = await db.Table<OutboxItem>().CountAsync() > 0;
+        var ranking = hasPending ? null : await TryGetRankingAsync(db, ct);
 
+        var obvious = ObviousChoice(open.Values);
         var items = new List<AdviceItem>();
-        var focus = ranking is not null ? FocusFromServer(ranking, open) : await FocusOfflineAsync(db, open);
+        var focus = ranking is not null
+            ? FocusFromServer(ranking, open, obvious)
+            : await FocusOfflineAsync(db, open, obvious);
         if (focus is not null)
         {
             items.Add(focus);
@@ -94,10 +99,13 @@ public sealed class AIClientService(
             return null;
         }
 
+        using var limit = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        limit.CancelAfter(ServerTimeout); // порада не повинна чекати повільний сервер
+
         try
         {
-            await EnsureTimeZoneAsync(ct);
-            var ranking = await api.GetAsync<RankingResponse>("api/recommendations/ranking", ct);
+            await EnsureTimeZoneAsync(limit.Token);
+            var ranking = await api.GetAsync<RankingResponse>("api/recommendations/ranking", limit.Token);
             await CacheAsync(db, ranking);
             return ranking;
         }
@@ -152,47 +160,74 @@ public sealed class AIClientService(
         });
     }
 
-    private AdviceItem? FocusFromServer(RankingResponse ranking, Dictionary<Guid, LocalTask> open)
+    /// <summary>
+    /// «Очевидний» вибір, який користувач і так бачить у списку: найвищий пріоритет, серед них найближчий дедлайн.
+    /// Рекомендація, що збігається з ним, нічого не додає і не показується.
+    /// </summary>
+    private static HashSet<Guid> ObviousChoice(IEnumerable<LocalTask> open)
     {
-        foreach (var ranked in ranking.Ranked.Where(r => r.RecommendationKey is not null).Take(TopCandidates))
+        var list = open.ToList();
+        if (list.Count == 0)
         {
-            if (!open.TryGetValue(ranked.TaskId, out var task) || AdviceStore.IsSuppressed($"focus:{ranked.TaskId}"))
-            {
-                continue;
-            }
-
-            return BuildFocus(task, ranked.Reasons.Select(r => r.Code).ToList(), ranked.IsExploration, ranked.RecommendationKey);
+            return [];
         }
 
-        return null;
+        var top = list.Max(t => t.Priority);
+        var group = list.Where(t => t.Priority == top).ToList();
+        var earliest = group.Min(t => t.DeadlineUtc ?? DateTime.MaxValue);
+        return group.Where(t => (t.DeadlineUtc ?? DateTime.MaxValue) == earliest).Select(t => t.Id).ToHashSet();
+    }
+
+    private AdviceItem? FocusFromServer(RankingResponse ranking, Dictionary<Guid, LocalTask> open, HashSet<Guid> obvious)
+    {
+        var top = ranking.Ranked.FirstOrDefault();
+        if (top is null || top.RecommendationKey is null || !open.TryGetValue(top.TaskId, out var task))
+        {
+            return null;
+        }
+
+        if (obvious.Contains(top.TaskId) || AdviceStore.IsSuppressed($"focus:{top.TaskId}"))
+        {
+            return null;
+        }
+
+        return BuildFocus(task, top.Reasons.Select(r => r.Code).ToList(), top.IsExploration, top.RecommendationKey);
     }
 
     /// <summary>Офлайн-евристика; ключ відгуку береться з кешу останнього ранжування, якщо завдання було в топ-3.</summary>
-    private async Task<AdviceItem?> FocusOfflineAsync(SQLiteAsyncConnection db, Dictionary<Guid, LocalTask> open)
+    private async Task<AdviceItem?> FocusOfflineAsync(
+        SQLiteAsyncConnection db, Dictionary<Guid, LocalTask> open, HashSet<Guid> obvious)
     {
-        var cache = await db.Table<RankingCache>().ToListAsync();
         var ranked = OfflineRanker.Rank(
             open.Values.Select(t => new OfflineTask(t.Id, t.Priority, Utc.Ensure(t.DeadlineUtc))), Utc.Now);
 
-        foreach (var item in ranked.Take(TopCandidates))
+        var top = ranked.FirstOrDefault();
+        if (top is null || obvious.Contains(top.TaskId) || AdviceStore.IsSuppressed($"focus:{top.TaskId}"))
         {
-            if (AdviceStore.IsSuppressed($"focus:{item.TaskId}"))
-            {
-                continue;
-            }
-
-            var key = cache
-                .FirstOrDefault(c => c.TaskId == item.TaskId && Utc.Now - Utc.Ensure(c.ComputedAtUtc) < KeyLifetime)
-                ?.RecommendationKey;
-            return BuildFocus(open[item.TaskId], item.ReasonCodes, false, key);
+            return null;
         }
 
-        return null;
+        var cache = await db.Table<RankingCache>().ToListAsync();
+        var key = cache
+            .FirstOrDefault(c => c.TaskId == top.TaskId && Utc.Now - Utc.Ensure(c.ComputedAtUtc) < KeyLifetime)
+            ?.RecommendationKey;
+        return BuildFocus(open[top.TaskId], top.ReasonCodes, false, key);
     }
 
-    private AdviceItem BuildFocus(LocalTask task, IReadOnlyList<string> codes, bool exploration, string? key)
+    private AdviceItem? BuildFocus(LocalTask task, IReadOnlyList<string> codes, bool exploration, string? key)
     {
-        var reasons = codes.Select(ReasonText).OfType<string>().ToList();
+        // Пріоритет причиною не називаємо: рекомендація відрізняється від очевидного вибору саме тим, що причина інша.
+        var reasons = codes
+            .Where(c => !c.StartsWith("priority_", StringComparison.Ordinal))
+            .Select(ReasonText)
+            .OfType<string>()
+            .ToList();
+
+        if (reasons.Count == 0 && !exploration)
+        {
+            return null; // нічого, що варто пояснювати
+        }
+
         var detail = reasons.Count > 0 ? loc.Get("Advice_Why", string.Join("; ", reasons)) : string.Empty;
         if (exploration)
         {
@@ -205,7 +240,7 @@ public sealed class AIClientService(
             Kind = AdviceKind.Focus,
             Title = loc.Get("Advice_FocusTitle", task.Title),
             Summary = reasons.Count > 0 ? Capitalize(reasons[0]) : loc["Advice_FocusDefault"],
-            Detail = detail.Length > 0 ? detail : loc["Advice_FocusDefault"],
+            Detail = detail,
             TaskIds = [task.Id],
             RecommendationKey = key,
             IsActionable = true,
@@ -300,8 +335,7 @@ public sealed class AIClientService(
 
     private string? ReasonText(string code)
     {
-        var key = $"Reason_{code}";
-        var text = loc[key];
+        var text = loc[$"Reason_{code}"];
         return text.StartsWith('[') ? null : text;
     }
 

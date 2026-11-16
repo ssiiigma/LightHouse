@@ -50,7 +50,10 @@ public static class ExplanationBuilder
 
     private static ExplanationReason? ReasonFor(int index, double[] x) => index switch
     {
-        FeatureIndex.Priority => new("priority", "високий пріоритет завдання"),
+        FeatureIndex.Priority when x[FeatureIndex.Priority] >= 0.99 => new("priority_critical", "критичний пріоритет завдання"),
+        FeatureIndex.Priority when x[FeatureIndex.Priority] >= 0.6 => new("priority_high", "високий пріоритет завдання"),
+        FeatureIndex.Priority when x[FeatureIndex.Priority] >= 0.3 => new("priority_medium", "середній пріоритет завдання"),
+        FeatureIndex.Priority => null,
         FeatureIndex.Urgency when x[FeatureIndex.Overdue] >= 1.0 => new("overdue", "завдання вже прострочене"),
         FeatureIndex.Urgency when x[FeatureIndex.Urgency] >= 0.5 => new("deadline_within_day", "до дедлайну менше доби"),
         FeatureIndex.Urgency => new("deadline_approaching", "дедлайн наближається"),

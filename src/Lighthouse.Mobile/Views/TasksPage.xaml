@@ -34,7 +34,7 @@
                 <CollectionView ItemsSource="{Binding Groups}" IsGrouped="True">
 
                     <CollectionView.EmptyView>
-                        <Label Text="{loc:Translate Tasks_Empty}" Style="{StaticResource SubtitleLabel}"
+                        <Label Text="{Binding EmptyText}" Style="{StaticResource SubtitleLabel}"
                                HorizontalTextAlignment="Center" Margin="0,48,0,0" />
                     </CollectionView.EmptyView>
 

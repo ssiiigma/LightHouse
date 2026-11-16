@@ -11,10 +11,9 @@ namespace Lighthouse.Mobile.ViewModels;
 public sealed partial class AdviceBannerViewModel(IAIClient ai, ITaskSvc tasks, LocalizationService loc)
     : ObservableObject
 {
-    private static readonly TimeSpan MinInterval = TimeSpan.FromSeconds(20);
+    private int _dirty;
 
     private readonly List<AdviceItem> _items = [];
-    private DateTime _lastRefreshUtc = DateTime.MinValue;
     private bool _refreshing;
     private bool _busy;
     private string? _expandedFor;
@@ -50,21 +49,25 @@ public sealed partial class AdviceBannerViewModel(IAIClient ai, ITaskSvc tasks, 
         }
     }
 
-    /// <summary>Оновлює поради (сервер або офлайн); не частіше ніж раз на 20 с, якщо не задано <paramref name="force"/>.</summary>
+    /// <summary>Оновлює поради. Якщо оновлення вже триває, після нього виконується ще одне (остання зміна даних не губиться).</summary>
     public async Task RefreshAsync(bool force = false)
     {
-        if (_refreshing || (!force && DateTime.UtcNow - _lastRefreshUtc < MinInterval))
+        if (_refreshing)
         {
+            Volatile.Write(ref _dirty, 1);
             return;
         }
 
         _refreshing = true;
         try
         {
-            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20));
-            var advice = await ai.GetAdviceAsync(timeout.Token);
-            _lastRefreshUtc = DateTime.UtcNow;
-            SetItems(advice);
+            do
+            {
+                Volatile.Write(ref _dirty, 0);
+                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                SetItems(await ai.GetAdviceAsync(timeout.Token));
+            }
+            while (Volatile.Read(ref _dirty) == 1);
         }
         catch (Exception)
         {
