@@ -57,7 +57,7 @@
                             <TimePicker Grid.Column="1" Time="{Binding DeadlineTime}" />
                             <controls:TimeInputView Grid.Column="1" Time="{Binding DeadlineTime}" />
                         </Grid>
-                        <controls:NoticeView Text="{Binding ProductiveText}" ActionText="{loc:Translate Btn_Substitute}"
+                        <controls:NoticeView Text="{Binding ProductiveText}" ActionText="{Binding ProductiveAction}"
                                              ActionCommand="{Binding ApplyProductiveTimeCommand}"
                                              IsVisible="{Binding ShowProductiveHint}" />
 

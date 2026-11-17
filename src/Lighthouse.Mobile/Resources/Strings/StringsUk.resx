@@ -199,4 +199,6 @@
     <data name="Notif_TaskBody" xml:space="preserve"><value>Нагадування про завдання</value></data>
     <data name="Notif_TaskDeadline" xml:space="preserve"><value>Дедлайн: {0}</value></data>
     <data name="Notif_HabitBody" xml:space="preserve"><value>Час виконати звичку</value></data>
+    <data name="Hint_ProductiveTomorrow" xml:space="preserve"><value>Сьогодні цей час уже минув. Перенести завдання на завтра й поставити нагадування на {0}?</value></data>
+    <data name="Btn_MoveToTomorrow" xml:space="preserve"><value>Перенести</value></data>
 </root>

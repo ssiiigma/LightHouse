@@ -11,7 +11,14 @@ public sealed class NoticeView : ContentView
 
     public static readonly BindableProperty TextProperty = BindableProperty.Create(
         nameof(Text), typeof(string), typeof(NoticeView), string.Empty,
-        propertyChanged: (b, _, n) => ((NoticeView)b)._label.Text = n as string);
+        propertyChanged: (b, _, n) =>
+        {
+            var view = (NoticeView)b;
+            view._label.Text = n as string;
+            view._frame.IsVisible = !string.IsNullOrWhiteSpace(n as string);
+        });
+
+    private readonly Border _frame;
 
     public static readonly BindableProperty ActionTextProperty = BindableProperty.Create(
         nameof(ActionText), typeof(string), typeof(NoticeView), string.Empty,
@@ -64,15 +71,17 @@ public sealed class NoticeView : ContentView
         grid.Children.Add(_label);
         grid.Children.Add(_action);
 
-        Content = new Border
+        _frame = new Border
         {
             BackgroundColor = Color.FromArgb("#29C8922A"),
             Stroke = Color.FromArgb("#80C8922A"),
             StrokeThickness = 1,
             Padding = new Thickness(12, 10),
             StrokeShape = new RoundRectangle { CornerRadius = 14 },
-            Content = grid
+            Content = grid,
+            IsVisible = false
         };
+        Content = _frame;
     }
 
     public string Text { get => (string)GetValue(TextProperty); set => SetValue(TextProperty, value); }

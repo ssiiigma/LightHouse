@@ -199,4 +199,6 @@
     <data name="Notif_TaskBody" xml:space="preserve"><value>Task reminder</value></data>
     <data name="Notif_TaskDeadline" xml:space="preserve"><value>Deadline: {0}</value></data>
     <data name="Notif_HabitBody" xml:space="preserve"><value>Time for your habit</value></data>
+    <data name="Hint_ProductiveTomorrow" xml:space="preserve"><value>That time has already passed today. Move the task to tomorrow and set the reminder for {0}?</value></data>
+    <data name="Btn_MoveToTomorrow" xml:space="preserve"><value>Move</value></data>
 </root>

@@ -318,4 +318,48 @@ public static class AnalyticsCalculator
 
         return (start, counts);
     }
+    
+    /// <summary>Підсумок за діапазон: виконання, регулярність звичок, серії, виконані за днями й розподіл за категоріями.</summary>
+    public static RangeSummary Summarize(
+        DateRange range, DateTime nowLocal, IReadOnlyList<AnalyticsTask> tasks, IReadOnlyList<AnalyticsHabit> habits)
+    {
+        ArgumentNullException.ThrowIfNull(tasks);
+        ArgumentNullException.ThrowIfNull(habits);
+
+        var today = DateOnly.FromDateTime(nowLocal);
+        var (completed, planned) = Completion(tasks, range);
+        var streaks = habits
+            .Select(h => HabitStreakCalculator.Calculate(h.Frequency, h.DaysOfWeekMask, h.TimesPerWeek, h.Logs, today))
+            .ToList();
+
+        var perDay = new int[range.Days];
+        foreach (var task in tasks)
+        {
+            if (InRange(task.CompletedLocal, range))
+            {
+                perDay[DateOnly.FromDateTime(task.CompletedLocal!.Value).DayNumber - range.From.DayNumber]++;
+            }
+        }
+
+        return new RangeSummary(
+            range, completed, planned, Rate(completed, planned), HabitScore(habits, range, today),
+            streaks.Count == 0 ? 0 : streaks.Max(s => s.Current),
+            streaks.Count == 0 ? 0 : streaks.Max(s => s.Best),
+            perDay.Select((count, index) => new DayCount(range.From.AddDays(index), count)).ToList(),
+            Categories(tasks, range, completed));
+    }
 }
+
+public sealed record DayCount(DateOnly Date, int Completed);
+
+/// <summary>Підсумок за довільний діапазон дат (для звітів); визначення показників збігаються з аналітикою застосунку.</summary>
+public sealed record RangeSummary(
+    DateRange Range,
+    int Completed,
+    int Planned,
+    double? CompletionRate,
+    double? HabitRegularity,
+    int CurrentStreak,
+    int BestStreak,
+    IReadOnlyList<DayCount> Days,
+    IReadOnlyList<CategoryShare> Categories);

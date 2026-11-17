@@ -52,6 +52,7 @@ public sealed partial class TaskEditViewModel(ITaskSvc tasks, LocalizationServic
     private bool _hasReminder;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(NeedsNextDay), nameof(ProductiveText), nameof(ProductiveAction), nameof(ShowProductiveHint))]
     private DateTime? _reminderDate = DateTime.Today;
 
     [ObservableProperty]
@@ -156,7 +157,7 @@ public sealed partial class TaskEditViewModel(ITaskSvc tasks, LocalizationServic
     }
     
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowProductiveHint), nameof(ProductiveText))]
+    [NotifyPropertyChangedFor(nameof(ShowProductiveHint), nameof(ProductiveText), nameof(NeedsNextDay), nameof(ProductiveAction))]
     private TimeSpan? _productiveTime;
 
     /// <summary>Підказка лише для High/Critical завдань, коли нагадування вимкнено або ще не прив'язане до часу, і час не пізніший за дедлайн.</summary>
@@ -164,16 +165,33 @@ public sealed partial class TaskEditViewModel(ITaskSvc tasks, LocalizationServic
         HasReminder && (Priority is TaskPriority.High or TaskPriority.Critical) && ProductiveTime is { } time
         && (!HasDeadline || Combine(ReminderDate, time) < Combine(DeadlineDate, DeadlineTime));
 
-    public string ProductiveText =>
-        ProductiveTime is { } t ? loc.Get("Hint_Productive", t.ToString(@"hh\:mm")) : string.Empty;
+    public bool NeedsNextDay => ProductiveTime is { } time && Combine(ReminderDate, time) <= DateTime.Now;
 
+    public string ProductiveText => ProductiveTime is not { } t
+        ? string.Empty
+        : loc.Get(NeedsNextDay ? "Hint_ProductiveTomorrow" : "Hint_Productive", t.ToString(@"hh\:mm"));
+
+    public string ProductiveAction => loc[NeedsNextDay ? "Btn_MoveToTomorrow" : "Btn_Substitute"];
+    
     [RelayCommand]
     private void ApplyProductiveTime()
     {
-        if (ProductiveTime is { } time)
+        if (ProductiveTime is not { } time)
         {
-            ReminderTime = time;
+            return;
         }
+
+        if (NeedsNextDay)
+        {
+            var tomorrow = DateTime.Today.AddDays(1);
+            ReminderDate = tomorrow;
+            if (HasDeadline && DeadlineDate?.Date < tomorrow)
+            {
+                DeadlineDate = tomorrow; // завдання переноситься на завтра разом із нагадуванням
+            }
+        }
+
+        ReminderTime = time;
     }
 
     [RelayCommand]

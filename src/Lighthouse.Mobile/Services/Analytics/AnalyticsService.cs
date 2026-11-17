@@ -3,6 +3,7 @@ using Lighthouse.Mobile.Infrastructure;
 using Lighthouse.Mobile.Models;
 using Lighthouse.Mobile.Services.Api;
 using Lighthouse.Shared.Analytics;
+using Lighthouse.Mobile.Localization;
 
 namespace Lighthouse.Mobile.Services.Analytics;
 
@@ -50,7 +51,8 @@ public sealed class AnalyticsService(ILocalDB localDb, IApiClient api) : IAnalyt
 
     public async Task<string> DownloadReportAsync(string format, DateRange range, CancellationToken ct)
     {
-        var path = $"api/reports?format={format}&from={HabitKeys.Format(range.From)}&to={HabitKeys.Format(range.To)}";
+        var path = $"api/reports?format={format}&from={HabitKeys.Format(range.From)}&to={HabitKeys.Format(range.To)}" +
+                   $"&lang={LocalizationService.Instance.Language}";
         var bytes = await api.GetBytesAsync(path, ct);
 
         var file = Path.Combine(FileSystem.CacheDirectory,
