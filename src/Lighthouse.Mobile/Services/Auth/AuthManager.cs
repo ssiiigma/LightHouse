@@ -5,6 +5,7 @@ using Lighthouse.Mobile.Services.Api;
 using Lighthouse.Mobile.Services.Notifications;
 using Lighthouse.Mobile.Services.Sync;
 using Lighthouse.Shared.Contracts.Auth;
+using Lighthouse.Mobile.Localization;
 
 namespace Lighthouse.Mobile.Services.Auth;
 
@@ -25,6 +26,11 @@ public interface IAuth
 
     /// <summary>Ім'я та пошта поточного користувача (з налаштувань, інакше з claim-ів токена доступу).</summary>
     Task<UserProfile> GetProfileAsync();
+    
+    /// <summary>Просить сервер надіслати лист зі скиданням пароля (відповідь однакова для будь-якої адреси).</summary>
+    Task RequestPasswordResetAsync(string email, CancellationToken ct = default);
+
+    Task ResetPasswordAsync(string token, string newPassword, CancellationToken ct = default);
 }
 
 public sealed class AuthManager : IAuth
@@ -59,7 +65,7 @@ public sealed class AuthManager : IAuth
 
     public async Task<AuthResponse> RegisterAsync(string name, string email, string password, CancellationToken ct = default)
     {
-        var auth = await _api.RegisterAsync(name, email, password, ct);
+        var auth = await _api.RegisterAsync(name, email, password, LocalizationService.Instance.Language, ct);
         await OnSignedInAsync(auth);
         return auth;
     }
@@ -175,4 +181,10 @@ public sealed class AuthManager : IAuth
             return false;
         }
     }
+    
+    public Task RequestPasswordResetAsync(string email, CancellationToken ct = default) =>
+        _api.ForgotPasswordAsync(email, LocalizationService.Instance.Language, ct);
+
+    public Task ResetPasswordAsync(string token, string newPassword, CancellationToken ct = default) =>
+        _api.ResetPasswordAsync(token, newPassword, ct);
 }

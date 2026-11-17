@@ -3,6 +3,7 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     platform: linux/amd64
     container_name: lighthouse-db
+    restart: unless-stopped
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_PID: Developer
@@ -18,22 +19,40 @@ services:
       retries: 10
       start_period: 20s
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: lighthouse-mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025"   # веб-інтерфейс перегляду листів
+      - "1025:1025"   # SMTP
+
   api:
     build:
       context: .
       dockerfile: src/Lighthouse.Api/Dockerfile
     container_name: lighthouse-api
+    restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
+      mailpit:
+        condition: service_started
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__Default: "Server=db,1433;Database=Lighthouse;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True"
       Jwt__Secret: ${JWT_SECRET}
       Database__AutoMigrate: "true"
+      DataProtection__KeysPath: /var/keys
+      Smtp__Host: mailpit
+      Smtp__Port: "1025"
+      App__PublicBaseUrl: http://localhost:8080
     ports:
       - "8080:8080"
+    volumes:
+      - dp-keys:/var/keys
 
 volumes:
   mssql-data:
+  dp-keys:

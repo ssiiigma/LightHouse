@@ -12,7 +12,9 @@ public interface IApiClient
     /// <summary>Виникає, коли refresh-токен відхилено сервером: потрібен повторний вхід.</summary>
     event Action? SessionExpired;
 
-    Task<AuthResponse> RegisterAsync(string name, string email, string password, CancellationToken ct);
+    Task<AuthResponse> RegisterAsync(string name, string email, string password, string? language, CancellationToken ct);
+    Task ForgotPasswordAsync(string email, string language, CancellationToken ct);
+    Task ResetPasswordAsync(string token, string newPassword, CancellationToken ct);
     Task<AuthResponse> LoginAsync(string email, string password, CancellationToken ct);
     Task LogoutAsync(string refreshToken, CancellationToken ct);
     Task<TResponse> GetAsync<TResponse>(string path, CancellationToken ct);
@@ -29,10 +31,25 @@ public sealed class ApiClient(HttpClient http, ISecureStore secureStore) : IApiC
 
     public event Action? SessionExpired;
 
-    public async Task<AuthResponse> RegisterAsync(string name, string email, string password, CancellationToken ct)
+    public async Task<AuthResponse> RegisterAsync(string name, string email, string password, string? language, CancellationToken ct)
     {
-        using var response = await http.PostAsJsonAsync("api/auth/register", new RegisterRequest(name, email, password), ct);
+        using var response = await http.PostAsJsonAsync(
+            "api/auth/register", new RegisterRequest(name, email, password, language), ct);
         return await ReadAuthResponseAsync(response, ct);
+    }
+
+    public async Task ForgotPasswordAsync(string email, string language, CancellationToken ct)
+    {
+        using var response = await http.PostAsJsonAsync(
+            "api/auth/forgot-password", new ForgotPasswordRequest(email, language), ct);
+        await EnsureSuccessAsync(response, ct);
+    }
+
+    public async Task ResetPasswordAsync(string token, string newPassword, CancellationToken ct)
+    {
+        using var response = await http.PostAsJsonAsync(
+            "api/auth/reset-password", new ResetPasswordRequest(token, newPassword), ct);
+        await EnsureSuccessAsync(response, ct);
     }
 
     public async Task<AuthResponse> LoginAsync(string email, string password, CancellationToken ct)

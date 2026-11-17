@@ -13,6 +13,7 @@ using Lighthouse.Api.Services.Recommendations;
 using Lighthouse.Api.Services.Tasks;
 using Lighthouse.Core.AI;
 using Lighthouse.Api.Services.Reports;
+using Lighthouse.Api.Services.Email;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +33,8 @@ builder.Host.UseSerilog((context, services, logger) => logger
 
 // ---------- Options ----------
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
+builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection(SmtpOptions.SectionName));
+builder.Services.Configure<AppOptions>(builder.Configuration.GetSection(AppOptions.SectionName));
 var jwt = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new JwtOptions();
 if (jwt.Secret.Length < 32)
 {
@@ -88,7 +91,10 @@ builder.Services.AddScoped<IBehaviorRecorder, BehaviorRecorder>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IHabitService, HabitService>();
 builder.Services.AddSingleton<ICalendarTokenProtector, CalendarTokenProtector>();
-
+builder.Services.AddSingleton<EmailQueue>();
+builder.Services.AddSingleton<IEmailQueue>(sp => sp.GetRequiredService<EmailQueue>());
+builder.Services.AddHostedService<EmailWorker>();
+builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddSingleton<IPrioritizer, Prioritizer>();
 builder.Services.AddScoped<BanditStore>();
 builder.Services.AddScoped<UserHistoryBuilder>();
@@ -123,6 +129,8 @@ app.UseRateLimiter(); // після автентифікації: ліміт н�
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapGet("/reset-password", (string? token) =>
+    Results.Content(AccountPages.ResetForm(token ?? string.Empty), "text/html; charset=utf-8")).AllowAnonymous();
 app.MapGet("/health", () => Results.Ok(new { status = "ok" })).AllowAnonymous();
 
 app.Run();

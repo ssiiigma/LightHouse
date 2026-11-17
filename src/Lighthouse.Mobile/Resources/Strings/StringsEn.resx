@@ -201,4 +201,18 @@
     <data name="Notif_HabitBody" xml:space="preserve"><value>Time for your habit</value></data>
     <data name="Hint_ProductiveTomorrow" xml:space="preserve"><value>That time has already passed today. Move the task to tomorrow and set the reminder for {0}?</value></data>
     <data name="Btn_MoveToTomorrow" xml:space="preserve"><value>Move</value></data>
+    <data name="Login_Forgot" xml:space="preserve"><value>Forgot password?</value></data>
+    <data name="Forgot_Title" xml:space="preserve"><value>Password recovery</value></data>
+    <data name="Forgot_Subtitle" xml:space="preserve"><value>Enter your email and we will send you a code to reset your password</value></data>
+    <data name="Forgot_Send" xml:space="preserve"><value>Send email</value></data>
+    <data name="Forgot_Sent" xml:space="preserve"><value>If an account with this address exists, we sent an email with a code. The code is valid for 24 hours.</value></data>
+    <data name="Forgot_HaveCode" xml:space="preserve"><value>I already have a code</value></data>
+    <data name="Forgot_CodePlaceholder" xml:space="preserve"><value>Code from the email</value></data>
+    <data name="Forgot_Reset" xml:space="preserve"><value>Change password</value></data>
+    <data name="Forgot_Resend" xml:space="preserve"><value>Send the email again</value></data>
+    <data name="Forgot_DoneTitle" xml:space="preserve"><value>Done</value></data>
+    <data name="Forgot_Done" xml:space="preserve"><value>Password changed. Sign in with the new password.</value></data>
+    <data name="Btn_Ok" xml:space="preserve"><value>OK</value></data>
+    <data name="Err_ResetInvalid" xml:space="preserve"><value>The code is invalid or has expired.</value></data>
+    <data name="Err_EnterCode" xml:space="preserve"><value>Enter the code from the email.</value></data>
 </root>

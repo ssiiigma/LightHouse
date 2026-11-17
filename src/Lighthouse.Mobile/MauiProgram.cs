@@ -77,6 +77,8 @@ public static class MauiProgram
         builder.Services.AddTransient<ViewModels.AdviceBannerViewModel>();
         builder.Services.AddTransient<ViewModels.CategoriesViewModel>();
         builder.Services.AddTransient<Views.CategoriesPage>();
+        builder.Services.AddTransient<ViewModels.ForgotPasswordViewModel>();
+        builder.Services.AddTransient<Views.ForgotPasswordPage>();
         
 #if DEBUG
         builder.Logging.AddDebug();

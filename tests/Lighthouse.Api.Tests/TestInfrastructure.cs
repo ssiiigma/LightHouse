@@ -7,6 +7,7 @@ using Lighthouse.Shared.Contracts.Categories;
 using Lighthouse.Shared.Contracts.Habits;
 using Lighthouse.Shared.Contracts.Tasks;
 using Lighthouse.Shared.Enums;
+using Lighthouse.Api.Services.Email;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -126,6 +127,7 @@ public sealed class CapturingSink : ILogEventSink
 public sealed class ApiFactory : WebApplicationFactory<Program>
 {
     private readonly Action<RateLimitOptions>? _configureLimits;
+    public TestApi.CapturingEmailQueue Emails { get; } = new();
 
     public CapturingSink Logs { get; } = new();
 
@@ -148,7 +150,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
                 options.ApiWindowSeconds = 60;
                 _configureLimits?.Invoke(options);
             });
-
+            services.AddSingleton<IEmailQueue>(Emails);
             services.AddSingleton<ILogEventSink>(Logs);
         });
     }
@@ -196,4 +198,19 @@ public static class TestApi
 
     public static UpsertHabitRequest NewHabit(string title) =>
         new(title, null, HabitFrequencyType.Daily, 0, null, null, null, null, null, DateTime.UtcNow);
+    
+    /// <summary>Замість SMTP зберігає листи в пам'яті, щоб тести могли прочитати токени.</summary>
+    public sealed class CapturingEmailQueue : IEmailQueue
+    {
+        private readonly ConcurrentQueue<EmailMessage> _messages = new();
+
+        public bool TryEnqueue(EmailMessage message)
+        {
+            _messages.Enqueue(message);
+            return true;
+        }
+
+        public IReadOnlyList<EmailMessage> To(string address) =>
+            _messages.Where(m => string.Equals(m.To, address, StringComparison.OrdinalIgnoreCase)).ToList();
+    }
 }

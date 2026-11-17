@@ -35,6 +35,8 @@
                     Command="{Binding LoginCommand}"
                     IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}" />
 
+            <Button Text="{loc:Translate Login_Forgot}" Style="{StaticResource GhostButton}"
+                    Command="{Binding ForgotPasswordCommand}" />
             <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
 
             <Button Text="{loc:Translate Btn_Back}" Style="{StaticResource GhostButton}" Command="{Binding GoBackCommand}" />

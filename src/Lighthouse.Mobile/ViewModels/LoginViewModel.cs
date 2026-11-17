@@ -63,4 +63,7 @@ public sealed partial class LoginViewModel(IAuth auth, LocalizationService loc) 
 
     [RelayCommand]
     private Task GoBackAsync() => Shell.Current.GoToAsync("..");
+    
+    [RelayCommand]
+    private Task ForgotPasswordAsync() => Shell.Current.GoToAsync(nameof(Views.ForgotPasswordPage));
 }

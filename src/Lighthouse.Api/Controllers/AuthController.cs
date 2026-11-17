@@ -1,9 +1,9 @@
 using FluentValidation;
+using Lighthouse.Api.Infrastructure;
 using Lighthouse.Api.Services.Auth;
 using Lighthouse.Shared.Contracts.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Lighthouse.Api.Infrastructure;
 using Microsoft.AspNetCore.RateLimiting;
 
 namespace Lighthouse.Api.Controllers;
@@ -11,7 +11,7 @@ namespace Lighthouse.Api.Controllers;
 [Route("api/auth")]
 [AllowAnonymous]
 [EnableRateLimiting(RateLimitPolicies.Auth)]
-public sealed class AuthController(IAuthService auth) : ApiControllerBase
+public sealed class AuthController(IAuthService auth, IAccountService accounts) : ApiControllerBase
 {
     [HttpPost("register")]
     public async Task<ActionResult<AuthResponse>> Register(
@@ -44,5 +44,53 @@ public sealed class AuthController(IAuthService auth) : ApiControllerBase
         return NoContent();
     }
 
-    // TODO: POST /api/auth/google (GoogleLoginRequest) — перевірка ID-токена через Google.Apis.Auth.
+    /// <summary>Лист зі скиданням пароля. Відповідь 202 однакова для існуючих і неіснуючих адрес.</summary>
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword(
+        ForgotPasswordRequest request, [FromServices] IValidator<ForgotPasswordRequest> validator, CancellationToken ct)
+    {
+        if (await ValidateAsync(validator, request, ct) is { } invalid) return invalid;
+        await accounts.RequestPasswordResetAsync(request.Email, request.Language, ct);
+        return Accepted();
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword(
+        ResetPasswordRequest request, [FromServices] IValidator<ResetPasswordRequest> validator, CancellationToken ct)
+    {
+        if (await ValidateAsync(validator, request, ct) is { } invalid) return invalid;
+        await accounts.ResetPasswordAsync(request.Token, request.NewPassword, ct);
+        return NoContent();
+    }
+
+    [HttpPost("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail(
+        ConfirmEmailRequest request, [FromServices] IValidator<ConfirmEmailRequest> validator, CancellationToken ct)
+    {
+        if (await ValidateAsync(validator, request, ct) is { } invalid) return invalid;
+        await accounts.ConfirmEmailAsync(request.Token, ct);
+        return NoContent();
+    }
+
+    /// <summary>Посилання з листа підтвердження: показує сторінку з результатом.</summary>
+    [HttpGet("confirm-email")]
+    public async Task<IActionResult> ConfirmEmailPage([FromQuery] string? token, CancellationToken ct)
+    {
+        try
+        {
+            await accounts.ConfirmEmailAsync(token ?? string.Empty, ct);
+            return Content(AccountPages.ConfirmResult(true), "text/html; charset=utf-8");
+        }
+        catch (AppException)
+        {
+            return new ContentResult
+            {
+                Content = AccountPages.ConfirmResult(false),
+                ContentType = "text/html; charset=utf-8",
+                StatusCode = StatusCodes.Status400BadRequest
+            };
+        }
+    }
+
+    // TODO (P5.5): POST /api/auth/google (GoogleLoginRequest): перевірка ID-токена.
 }

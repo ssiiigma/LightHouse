@@ -6,7 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Lighthouse.Api.Services.Auth;
 
-public sealed class AuthService(LighthouseDbContext db, ITokenService tokens) : IAuthService
+public sealed class AuthService(
+    LighthouseDbContext db, ITokenService tokens, IAccountService accounts, ILogger<AuthService> logger)
+    : IAuthService
 {
     private const int MaxFailedAttempts = 5;                            // FR-8
     private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(15);
@@ -25,12 +27,22 @@ public sealed class AuthService(LighthouseDbContext db, ITokenService tokens) : 
             Name = request.Name.Trim(),
             Email = email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
-            // TODO (FR-4): надіслати лист підтвердження та виставляти IsEmailConfirmed після переходу за посиланням.
         };
         user.NotificationSettings = new NotificationSettings { UserId = user.Id };
 
         db.Users.Add(user);
-        return await IssueTokensAsync(user, ct); // користувач і refresh-токен зберігаються однією транзакцією
+        var response = await IssueTokensAsync(user, ct); // користувач і refresh-токен зберігаються однією транзакцією
+
+        try
+        {
+            await accounts.SendConfirmationAsync(user, request.Language, ct);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.LogWarning(ex, "The confirmation email was not queued."); // реєстрація від цього не залежить
+        }
+
+        return response;
     }
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken ct)

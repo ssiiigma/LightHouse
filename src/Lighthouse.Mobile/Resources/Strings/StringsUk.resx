@@ -201,4 +201,18 @@
     <data name="Notif_HabitBody" xml:space="preserve"><value>Час виконати звичку</value></data>
     <data name="Hint_ProductiveTomorrow" xml:space="preserve"><value>Сьогодні цей час уже минув. Перенести завдання на завтра й поставити нагадування на {0}?</value></data>
     <data name="Btn_MoveToTomorrow" xml:space="preserve"><value>Перенести</value></data>
+    <data name="Login_Forgot" xml:space="preserve"><value>Забули пароль?</value></data>
+    <data name="Forgot_Title" xml:space="preserve"><value>Відновлення пароля</value></data>
+    <data name="Forgot_Subtitle" xml:space="preserve"><value>Вкажіть e-mail, і ми надішлемо лист із кодом для скидання пароля</value></data>
+    <data name="Forgot_Send" xml:space="preserve"><value>Надіслати лист</value></data>
+    <data name="Forgot_Sent" xml:space="preserve"><value>Якщо обліковий запис з такою адресою існує, ми надіслали лист із кодом. Код дійсний 24 години.</value></data>
+    <data name="Forgot_HaveCode" xml:space="preserve"><value>У мене вже є код</value></data>
+    <data name="Forgot_CodePlaceholder" xml:space="preserve"><value>Код з листа</value></data>
+    <data name="Forgot_Reset" xml:space="preserve"><value>Змінити пароль</value></data>
+    <data name="Forgot_Resend" xml:space="preserve"><value>Надіслати лист ще раз</value></data>
+    <data name="Forgot_DoneTitle" xml:space="preserve"><value>Готово</value></data>
+    <data name="Forgot_Done" xml:space="preserve"><value>Пароль змінено. Увійдіть з новим паролем.</value></data>
+    <data name="Btn_Ok" xml:space="preserve"><value>Гаразд</value></data>
+    <data name="Err_ResetInvalid" xml:space="preserve"><value>Код недійсний або прострочений.</value></data>
+    <data name="Err_EnterCode" xml:space="preserve"><value>Введіть код з листа.</value></data>
 </root>
