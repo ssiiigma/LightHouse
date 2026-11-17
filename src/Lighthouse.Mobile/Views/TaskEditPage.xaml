@@ -57,6 +57,9 @@
                             <TimePicker Grid.Column="1" Time="{Binding DeadlineTime}" />
                             <controls:TimeInputView Grid.Column="1" Time="{Binding DeadlineTime}" />
                         </Grid>
+                        <controls:NoticeView Text="{Binding ProductiveText}" ActionText="{loc:Translate Btn_Substitute}"
+                                             ActionCommand="{Binding ApplyProductiveTimeCommand}"
+                                             IsVisible="{Binding ShowProductiveHint}" />
 
                         <BoxView HeightRequest="1" Color="{StaticResource Hairline}" />
 
@@ -135,6 +138,10 @@
                             <Button Grid.Column="1" Text="+" Command="{Binding AddCategoryCommand}"
                                     WidthRequest="48" HeightRequest="48" Padding="0" FontSize="22" CornerRadius="14" />
                         </Grid>
+                        <controls:NoticeView Text="{Binding InfoMessage}"
+                                             IsVisible="{Binding InfoMessage, Converter={StaticResource StringToBoolConverter}}" />
+                        <Button Text="{loc:Translate Cat_Manage}" Style="{StaticResource GhostButton}"
+                                HorizontalOptions="Start" Command="{Binding OpenCategoriesCommand}" />
 
                         <Label Text="{loc:Translate Form_Estimate}" FontFamily="DMSansMedium" Margin="0,6,0,0" />
                         <Border Style="{StaticResource FieldBorder}">

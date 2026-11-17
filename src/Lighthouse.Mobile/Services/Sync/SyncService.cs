@@ -198,7 +198,7 @@ public sealed class SyncService : ISyncSvc
             // Порядок: категорії, звички, завдання, відмітки, відгуки; всередині типу — за часом створення.
             var queue = await db.Table<OutboxItem>().Where(i => i.Attempts < OutboxStore.MaxAttempts).ToListAsync();
             var item = queue
-                .OrderBy(i => _handlers.FirstOrDefault(h => h.EntityType == i.EntityType)?.PullOrder ?? int.MaxValue)
+                .OrderBy(OrderOf)
                 .ThenBy(i => i.Id)
                 .FirstOrDefault();
             if (item is null)
@@ -333,4 +333,10 @@ public sealed class SyncService : ISyncSvc
         await SyncCursor.ResetAsync(db);
         return await SyncNowAsync();
     }
+    
+    /// <summary>Видалення категорії надсилається після завдань, які на неї посилались (інакше сервер сам скине їм категорію новішим часом).</summary>
+    private int OrderOf(OutboxItem item) =>
+        item.EntityType == EntityTypes.Category && item.Operation == OutboxStore.Delete
+            ? 50
+            : _handlers.FirstOrDefault(h => h.EntityType == item.EntityType)?.PullOrder ?? int.MaxValue;
 }

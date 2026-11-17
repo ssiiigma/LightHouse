@@ -31,6 +31,8 @@ public sealed class TaskModel
     public List<SubtaskModel> Subtasks { get; set; } = [];
     public DateTime UpdatedAtUtc { get; set; }
     public SyncState SyncState { get; set; }
+    /// <summary>Результат додавання категорії: <see cref="Created"/> = false, якщо категорія з такою назвою вже існує (повертається вона).</summary>
+    public sealed record CategoryAddResult(Guid Id, bool Created);
 
     // Подання (заповнюється моделлю екрана).
     public string? CategoryName { get; set; }

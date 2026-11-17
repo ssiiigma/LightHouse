@@ -151,6 +151,9 @@
                         </Grid>
                         <TimePicker Time="{Binding ReminderTime}" IsVisible="{Binding HasReminder}" />
                         <controls:TimeInputView Time="{Binding ReminderTime}" IsVisible="{Binding HasReminder}" HorizontalOptions="Start" />
+                        <controls:NoticeView Text="{Binding ProductiveText}" ActionText="{loc:Translate Btn_Substitute}"
+                                             ActionCommand="{Binding ApplyProductiveTimeCommand}"
+                                             IsVisible="{Binding ShowProductiveHint}" />
                     </VerticalStackLayout>
                 </Border>
 

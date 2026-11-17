@@ -2,6 +2,7 @@ using System.Text.Json;
 using Lighthouse.Mobile.Data;
 using Lighthouse.Mobile.Infrastructure;
 using Lighthouse.Mobile.Services.Api;
+using Lighthouse.Mobile.Services.Notifications;
 using Lighthouse.Mobile.Services.Sync;
 using Lighthouse.Shared.Contracts.Auth;
 
@@ -32,15 +33,17 @@ public sealed class AuthManager : IAuth
     private readonly ISecureStore _secureStore;
     private readonly ILocalDB _localDb;
     private readonly ISyncSvc _sync;
+    private readonly INotif _notif;
 
     public event Action? SessionExpired;
 
-    public AuthManager(IApiClient api, ISecureStore secureStore, ILocalDB localDb, ISyncSvc sync)
+    public AuthManager(IApiClient api, ISecureStore secureStore, ILocalDB localDb, ISyncSvc sync, INotif notif)
     {
         _api = api;
         _secureStore = secureStore;
         _localDb = localDb;
         _sync = sync;
+        _notif = notif;
         _api.SessionExpired += () =>
         {
             _sync.Stop();
@@ -126,6 +129,7 @@ public sealed class AuthManager : IAuth
         {
             using var limit = new CancellationTokenSource(TimeSpan.FromSeconds(20));
             await _sync.SyncNowAsync(limit.Token);
+            _notif.RequestReschedule();
         }
         catch (Exception)
         {
@@ -138,6 +142,7 @@ public sealed class AuthManager : IAuth
     private async Task ClearLocalDataAsync()
     {
         await _localDb.ClearAllAsync();
+        await _notif.CancelAllAsync();
         SyncCursor.ClearLegacy();
         Preferences.Default.Remove(PreferenceKeys.UserId);
         Preferences.Default.Remove(PreferenceKeys.UserName);

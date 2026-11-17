@@ -8,6 +8,8 @@ using Lighthouse.Shared.Contracts.Tasks;
 using Lighthouse.Shared.Enums;
 using Lighthouse.Shared.Contracts.Categories;
 using SQLite;
+using Lighthouse.Shared.Categories;
+using Lighthouse.Shared.Scheduling;
 
 namespace Lighthouse.Mobile.Services.Tasks;
 
@@ -40,13 +42,22 @@ public interface ITaskSvc
 
     Task<IReadOnlyList<CategoryModel>> GetCategoriesAsync();
     
-    Task<Guid> SaveCategoryAsync(string name);
+    /// <summary>Додає категорію; якщо категорія з такою назвою вже є, нової не створює й повертає наявну.</summary>
+    Task<TaskModel.CategoryAddResult> AddCategoryAsync(string name);
+
+    /// <summary>М'яке видалення категорії; її завдання лишаються без категорії.</summary>
+    Task DeleteCategoryAsync(Guid id);
+
+    /// <summary>Зливає категорії з однаковою назвою (лишається одна, завдання переносяться в неї); повертає кількість видалених копій.</summary>
+    Task<int> MergeDuplicateCategoriesAsync();
     
     /// <summary>Змінює час нагадування завдання (порада «перенести нагадування»).</summary>
     Task SetReminderAsync(Guid id, DateTime reminderUtc);
 
     /// <summary>Зсуває дедлайн і нагадування невиконаних завдань (порада «перенести на наступну добу»).</summary>
     Task ShiftAsync(IReadOnlyList<Guid> ids, TimeSpan shift);
+    
+    Task<TimeSpan?> GetProductiveTimeAsync();
 }
 
 public sealed class TaskService(ILocalDB localDb, ISyncSvc sync) : ITaskSvc
@@ -59,36 +70,136 @@ public sealed class TaskService(ILocalDB localDb, ISyncSvc sync) : ITaskSvc
     
     private static readonly string[] CategoryPalette = ["#4C8BF5", "#5BB97C", "#E8A23A", "#805AD5", "#E05C7B", "#38B2AC"];
 
-    public async Task<Guid> SaveCategoryAsync(string name)
+        public async Task<TaskModel.CategoryAddResult> AddCategoryAsync(string name)
     {
-        var title = name.Trim();
+        var title = CategoryNames.Normalize(name);
         if (title.Length == 0)
         {
             throw new ArgumentException("Name is required.", nameof(name));
         }
 
-        var id = Guid.NewGuid();
         var now = Utc.Now;
         var db = await localDb.GetConnectionAsync();
+        var resultId = Guid.Empty;
+        var created = false;
 
         await db.RunInTransactionAsync(tx =>
         {
-            var count = tx.Table<LocalCategory>().Count(c => !c.IsDeleted);
+            var existing = tx.Table<LocalCategory>().ToList()
+                .Where(c => !c.IsDeleted)
+                .FirstOrDefault(c => CategoryNames.IsSame(c.Name, title));
+            if (existing is not null)
+            {
+                resultId = existing.Id;
+                return;
+            }
+
+            var count = tx.Table<LocalCategory>().ToList().Count(c => !c.IsDeleted);
             var row = new LocalCategory
             {
-                Id = id,
+                Id = Guid.NewGuid(),
                 Name = title,
                 ColorHex = CategoryPalette[count % CategoryPalette.Length],
                 UpdatedAtUtc = now,
                 SyncState = SyncState.Pending
             };
             tx.Insert(row);
-            OutboxStore.Enqueue(tx, EntityTypes.Category, id, OutboxStore.Put,
+            OutboxStore.Enqueue(tx, EntityTypes.Category, row.Id, OutboxStore.Put,
                 JsonSerializer.Serialize(new UpsertCategoryRequest(row.Name, row.ColorHex, row.Icon, now), AppJson.Options));
+
+            resultId = row.Id;
+            created = true;
         });
 
+        if (created)
+        {
+            Notify();
+        }
+
+        return new TaskModel.CategoryAddResult(resultId, created);
+    }
+        
+    public async Task<TimeSpan?> GetProductiveTimeAsync()
+    {
+        var db = await localDb.GetConnectionAsync();
+        var rows = await db.Table<LocalTask>().Where(t => !t.IsDeleted).ToListAsync();
+        var completed = rows
+            .Where(t => t.CompletedAtUtc is not null)
+            .Select(t => DateTime.SpecifyKind(t.CompletedAtUtc!.Value, DateTimeKind.Utc).ToLocalTime());
+
+        return ScheduleAdvisor.SuggestTime(DateTime.Now, completed);
+    }
+
+    public async Task DeleteCategoryAsync(Guid id)
+    {
+        var now = Utc.Now;
+        var db = await localDb.GetConnectionAsync();
+        await db.RunInTransactionAsync(tx => RemoveCategory(tx, id, replacement: null, now));
         Notify();
-        return id;
+    }
+
+    public async Task<int> MergeDuplicateCategoriesAsync()
+    {
+        var now = Utc.Now;
+        var db = await localDb.GetConnectionAsync();
+        var merged = 0;
+
+        await db.RunInTransactionAsync(tx =>
+        {
+            var groups = tx.Table<LocalCategory>().ToList()
+                .Where(c => !c.IsDeleted)
+                .GroupBy(c => CategoryNames.Normalize(c.Name), CategoryNames.Comparer)
+                .Where(g => g.Count() > 1);
+
+            foreach (var group in groups)
+            {
+                // Лишається категорія з найменшим Id: вибір однаковий на всіх пристроях.
+                var ordered = group.OrderBy(c => c.Id).ToList();
+                foreach (var duplicate in ordered.Skip(1))
+                {
+                    RemoveCategory(tx, duplicate.Id, ordered[0].Id, now);
+                    merged++;
+                }
+            }
+        });
+
+        if (merged > 0)
+        {
+            Notify();
+        }
+
+        return merged;
+    }
+
+    /// <summary>
+    /// Видаляє категорію: її завдання переносяться в <paramref name="replacement"/> (або лишаються без категорії) і ставляться
+    /// в чергу на надсилання; саме видалення категорії надсилається останнім (див. порядок черги в SyncService).
+    /// </summary>
+    private static void RemoveCategory(SQLiteConnection tx, Guid id, Guid? replacement, DateTime now)
+    {
+        if (tx.Find<LocalCategory>(id) is not { } category)
+        {
+            return;
+        }
+
+        foreach (var task in tx.Table<LocalTask>().ToList().Where(t => t.CategoryId == id))
+        {
+            task.CategoryId = replacement;
+            if (task.IsDeleted)
+            {
+                tx.Update(task); // видалення завдання вже в черзі; не воскрешаємо його новою операцією
+            }
+            else
+            {
+                Touch(tx, task, now);
+            }
+        }
+
+        category.IsDeleted = true;
+        category.UpdatedAtUtc = now;
+        category.SyncState = SyncState.Pending;
+        tx.Update(category);
+        OutboxStore.Enqueue(tx, EntityTypes.Category, id, OutboxStore.Delete, null);
     }
 
     public async Task<IReadOnlyList<TaskModel>> GetTasksAsync()

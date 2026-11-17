@@ -43,10 +43,6 @@ public sealed class AIClientService(
         var db = await localDb.GetConnectionAsync();
         var rows = await db.Table<LocalTask>().Where(t => !t.IsDeleted).ToListAsync();
         var open = rows.Where(t => t.CompletedAtUtc is null).ToDictionary(t => t.Id);
-        var completedLocal = rows
-            .Where(t => t.CompletedAtUtc is not null)
-            .Select(t => ToLocal(t.CompletedAtUtc!.Value))
-            .ToList();
 
         // Сервер бачить лише надіслані зміни: поки на пристрої є непереслані, радимо за локальними даними.
         var hasPending = await db.Table<OutboxItem>().CountAsync() > 0;
@@ -62,7 +58,6 @@ public sealed class AIClientService(
             items.Add(focus);
         }
 
-        items.AddRange(RescheduleAdvice(open, completedLocal));
         if (ranking is not null)
         {
             items.AddRange(ResolutionAdvice(ranking, open));
@@ -247,42 +242,6 @@ public sealed class AIClientService(
             ApplyText = loc["Btn_Accept"],
             DismissText = loc["Btn_Reject"]
         };
-    }
-
-    // ---------- Поради щодо часу й ліміту ----------
-
-    private IEnumerable<AdviceItem> RescheduleAdvice(Dictionary<Guid, LocalTask> open, List<DateTime> completedLocal)
-    {
-        var candidates = open.Values
-            .Where(t => t.ReminderAtUtc is not null)
-            .Select(t => new ScheduleTask(
-                t.Id, ToLocal(t.ReminderAtUtc!.Value), t.DeadlineUtc is { } d ? ToLocal(d) : null))
-            .ToList();
-
-        foreach (var suggestion in ScheduleAdvisor.Suggest(DateTime.Now, completedLocal, candidates).Take(3))
-        {
-            var id = $"resched:{suggestion.TaskId}:{suggestion.CurrentLocal.Ticks}";
-            if (AdviceStore.IsSuppressed(id))
-            {
-                continue;
-            }
-
-            var task = open[suggestion.TaskId];
-            yield return new AdviceItem
-            {
-                Id = id,
-                Kind = AdviceKind.Reschedule,
-                Title = loc.Get("Advice_Reschedule_Title", task.Title),
-                Summary = loc["Advice_Reschedule_Summary"],
-                Detail = loc.Get("Advice_Reschedule_Detail",
-                    FormatMoment(suggestion.CurrentLocal), BlockLabel(suggestion.BestBlock), FormatMoment(suggestion.ProposedLocal)),
-                TaskIds = [task.Id],
-                ProposedReminderUtc = DateTime.SpecifyKind(suggestion.ProposedLocal, DateTimeKind.Local).ToUniversalTime(),
-                IsActionable = true,
-                ApplyText = loc["Btn_Apply"],
-                DismissText = loc["Btn_Dismiss"]
-            };
-        }
     }
 
     private IEnumerable<AdviceItem> ResolutionAdvice(RankingResponse ranking, Dictionary<Guid, LocalTask> open)

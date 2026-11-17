@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using Lighthouse.Mobile.Localization;
 using Lighthouse.Mobile.Models;
 using Lighthouse.Mobile.Services.Habits;
+using Lighthouse.Mobile.Services.Tasks;
 using Lighthouse.Shared.Enums;
 
 namespace Lighthouse.Mobile.ViewModels;
@@ -27,7 +28,7 @@ public sealed partial class ColorChip : ObservableObject
     private bool _isSelected;
 }
 
-public sealed partial class HabitEditViewModel(IHabitSvc habits, LocalizationService loc)
+public sealed partial class HabitEditViewModel(IHabitSvc habits, ITaskSvc tasks, LocalizationService loc)
     : ObservableObject, IQueryAttributable
 {
     private static readonly string[] Palette = ["#38B2AC", "#E8864A", "#805AD5", "#5B9BD5", "#E05C7B", "#4CAF7D", "#E8B84B"];
@@ -50,6 +51,7 @@ public sealed partial class HabitEditViewModel(IHabitSvc habits, LocalizationSer
     private string _timesPerWeekText = "3";
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowProductiveHint))]
     private bool _hasReminder;
 
     [ObservableProperty]
@@ -110,6 +112,7 @@ public sealed partial class HabitEditViewModel(IHabitSvc habits, LocalizationSer
         {
             await LoadAsync(id);
         }
+        ProductiveTime = await tasks.GetProductiveTimeAsync();
     }
 
     public void ToggleDay(DayChip chip) => chip.IsSelected = !chip.IsSelected;
@@ -171,6 +174,24 @@ public sealed partial class HabitEditViewModel(IHabitSvc habits, LocalizationSer
         });
 
         await Shell.Current.GoToAsync("..");
+    }
+    
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowProductiveHint), nameof(ProductiveText))]
+    private TimeSpan? _productiveTime;
+
+    public bool ShowProductiveHint => HasReminder && ProductiveTime is not null;
+
+    public string ProductiveText =>
+        ProductiveTime is { } t ? loc.Get("Hint_Productive", t.ToString(@"hh\:mm")) : string.Empty;
+
+    [RelayCommand]
+    private void ApplyProductiveTime()
+    {
+        if (ProductiveTime is { } time)
+        {
+            ReminderTime = time;
+        }
     }
 
     [RelayCommand]

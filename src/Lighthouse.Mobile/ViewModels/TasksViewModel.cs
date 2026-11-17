@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using Lighthouse.Mobile.Localization;
 using Lighthouse.Mobile.Models;
 using Lighthouse.Mobile.Services.Auth;
+using Lighthouse.Mobile.Services.Notifications;
 using Lighthouse.Mobile.Services.Sync;
 using Lighthouse.Mobile.Services.Tasks;
 using Lighthouse.Shared.Enums;
@@ -20,7 +21,7 @@ public sealed class TaskGroup(string title, Color dotColor, IEnumerable<TaskMode
 }
 
 public sealed partial class TasksViewModel(
-    ITaskSvc tasks, ISyncSvc sync, IAuth auth, LocalizationService loc, AdviceBannerViewModel banner)
+    ITaskSvc tasks, ISyncSvc sync, IAuth auth, LocalizationService loc, AdviceBannerViewModel banner, INotif notif)
     : ObservableObject
 {
     /// <summary>
@@ -64,9 +65,15 @@ public sealed partial class TasksViewModel(
         auth.SessionExpired += OnSessionExpired;
         loc.PropertyChanged += OnLanguageChanged;
 
+        await tasks.MergeDuplicateCategoriesAsync();
         await tasks.RecoverAsync();
         sync.Start();
         await LoadAsync();
+        if (!Preferences.Default.Get("notif.asked", false))
+        {
+            Preferences.Default.Set("notif.asked", true);
+            _ = notif.RequestPermissionAsync(); // дозвіл на сповіщення запитується один раз при першому відкритті
+        }
         _ = Banner.RefreshAsync(force: true);
         UpdateStatus(sync.Status);
     }

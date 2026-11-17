@@ -6,6 +6,8 @@ using Lighthouse.Mobile.Services.Auth;
 using Lighthouse.Mobile.Services.Sync;
 using Lighthouse.Mobile.Services.Tasks;
 using Microsoft.Extensions.Logging;
+using Plugin.LocalNotification; 
+using Lighthouse.Mobile.Services.Notifications;
 
 namespace Lighthouse.Mobile;
 
@@ -21,7 +23,7 @@ public static class MauiProgram
             fonts.AddFont("DMSans-SemiBold.ttf", "DMSansSemibold");
             fonts.AddFont("DMSans-Bold.ttf", "DMSansBold");
             fonts.AddFont("CormorantGaramond-Light.ttf", "CormorantLight");
-        }).UseMauiCommunityToolkit();
+        }).UseLocalNotification().UseMauiCommunityToolkit();
 
         // Інфраструктура: екрани → сервіси → інфраструктура, без обходів.
         builder.Services.AddSingleton<IConnectivity>(Connectivity.Current);
@@ -48,6 +50,10 @@ public static class MauiProgram
         builder.Services.AddSingleton<Services.Analytics.IAnalyticsSvc, Services.Analytics.AnalyticsService>();
         builder.Services.AddSingleton<IEntitySyncHandler, FeedbackSyncHandler>();
         builder.Services.AddSingleton<Services.AI.IAIClient, Services.AI.AIClientService>();
+        builder.Services.AddSingleton<ILocalNotif, LocalNotifier>();
+        builder.Services.AddSingleton<ISystemSettings, AndroidSystemSettings>();
+        builder.Services.AddSingleton<INotifSettings, NotificationSettingsStore>();
+        builder.Services.AddSingleton<INotif, NotifManager>();
 
         // Екрани.
         builder.Services.AddTransient<ViewModels.WelcomeViewModel>();
@@ -69,6 +75,8 @@ public static class MauiProgram
         builder.Services.AddTransient<ViewModels.AnalyticsViewModel>();
         builder.Services.AddTransient<Views.AnalyticsPage>();
         builder.Services.AddTransient<ViewModels.AdviceBannerViewModel>();
+        builder.Services.AddTransient<ViewModels.CategoriesViewModel>();
+        builder.Services.AddTransient<Views.CategoriesPage>();
         
 #if DEBUG
         builder.Logging.AddDebug();

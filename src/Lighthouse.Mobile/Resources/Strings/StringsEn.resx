@@ -176,4 +176,27 @@
     <data name="Sync_Parked" xml:space="preserve"><value>Changes that could not be uploaded: {0}.</value></data>
     <data name="Sync_Full" xml:space="preserve"><value>Re-download everything from the server</value></data>
     <data name="Tasks_NoActive" xml:space="preserve"><value>No active tasks. Completed earlier: {0}.</value></data>
+    <data name="Cat_Title" xml:space="preserve"><value>Categories</value></data>
+    <data name="Cat_Manage" xml:space="preserve"><value>Manage categories</value></data>
+    <data name="Cat_Empty" xml:space="preserve"><value>No categories yet.</value></data>
+    <data name="Cat_AlreadyExists" xml:space="preserve"><value>A category with this name already exists.</value></data>
+    <data name="Cat_DeleteTitle" xml:space="preserve"><value>Delete category</value></data>
+    <data name="Cat_DeleteConfirm" xml:space="preserve"><value>Delete the category “{0}”? Its tasks will be left without a category.</value></data>
+    <data name="Profile_TimeZone" xml:space="preserve"><value>Time zone: {0}</value></data>
+    <data name="Notif_Title" xml:space="preserve"><value>Notifications</value></data>
+    <data name="Notif_Tasks" xml:space="preserve"><value>Task reminders</value></data>
+    <data name="Notif_Habits" xml:space="preserve"><value>Habit reminders</value></data>
+    <data name="Notif_Quiet" xml:space="preserve"><value>Quiet mode</value></data>
+    <data name="Notif_QuietFrom" xml:space="preserve"><value>Quiet from</value></data>
+    <data name="Notif_QuietTo" xml:space="preserve"><value>until</value></data>
+    <data name="Notif_Blocked" xml:space="preserve"><value>Notifications are turned off in the system: reminders will not arrive.</value></data>
+    <data name="Notif_ExactBlocked" xml:space="preserve"><value>Exact reminders are turned off: they may arrive late.</value></data>
+    <data name="Notif_BatteryNote" xml:space="preserve"><value>On some phones battery saving delays reminders. Add Lighthouse to the exceptions.</value></data>
+    <data name="Btn_Allow" xml:space="preserve"><value>Allow</value></data>
+    <data name="Btn_BatterySettings" xml:space="preserve"><value>Settings</value></data>
+    <data name="Btn_Substitute" xml:space="preserve"><value>Use it</value></data>
+    <data name="Hint_Productive" xml:space="preserve"><value>Your most productive time is {0}</value></data>
+    <data name="Notif_TaskBody" xml:space="preserve"><value>Task reminder</value></data>
+    <data name="Notif_TaskDeadline" xml:space="preserve"><value>Deadline: {0}</value></data>
+    <data name="Notif_HabitBody" xml:space="preserve"><value>Time for your habit</value></data>
 </root>

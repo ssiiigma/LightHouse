@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Lighthouse.Mobile.ViewModels"
+             xmlns:conv="clr-namespace:Lighthouse.Mobile.Converters"
+             xmlns:loc="clr-namespace:Lighthouse.Mobile.Localization"
+             xmlns:controls="clr-namespace:Lighthouse.Mobile.Controls"
+             x:Class="Lighthouse.Mobile.Views.CategoriesPage"
+             x:DataType="vm:CategoriesViewModel"
+             Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <conv:StringToBoolConverter x:Key="StringToBoolConverter" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*">
+
+        <Grid Padding="20,52,20,8" ColumnDefinitions="Auto,*" ColumnSpacing="12">
+            <Button Text="‹" Command="{Binding GoBackCommand}" WidthRequest="40" HeightRequest="40" Padding="0"
+                    FontSize="24" CornerRadius="12" BackgroundColor="{StaticResource Card}"
+                    BorderColor="{StaticResource Dim}" BorderWidth="1" TextColor="{StaticResource Cream}" />
+            <Label Grid.Column="1" Text="{loc:Translate Cat_Title}" FontFamily="DMSansSemibold" FontSize="20"
+                   VerticalOptions="Center" />
+        </Grid>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="16,8,16,32" Spacing="12">
+
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                    <Border Style="{StaticResource FieldBorder}">
+                        <Entry Text="{Binding NewName}" Placeholder="{loc:Translate Form_NewCategory}"
+                               ReturnCommand="{Binding AddCommand}" />
+                    </Border>
+                    <Button Grid.Column="1" Text="+" Command="{Binding AddCommand}"
+                            WidthRequest="48" HeightRequest="48" Padding="0" FontSize="22" CornerRadius="14" />
+                </Grid>
+
+                <!-- Повідомлення до відома (не помилка, тому не червоне) -->
+                <controls:NoticeView Text="{Binding InfoMessage}"
+                                     IsVisible="{Binding InfoMessage, Converter={StaticResource StringToBoolConverter}}" />
+                
+                <Label Text="{loc:Translate Cat_Empty}" Style="{StaticResource SubtitleLabel}"
+                       HorizontalTextAlignment="Center" IsVisible="{Binding IsEmpty}" Margin="0,24,0,0" />
+
+                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Items}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:CategoryItem">
+                            <Border Style="{StaticResource CardBorder}" Padding="14,4">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                    <BoxView WidthRequest="10" HeightRequest="10" CornerRadius="5"
+                                             Color="{Binding Color}" VerticalOptions="Center" />
+                                    <Label Grid.Column="1" Text="{Binding Name}" FontFamily="DMSansMedium"
+                                           VerticalOptions="Center" />
+                                    <Button Grid.Column="2" Text="✕" Clicked="OnDeleteClicked"
+                                            BackgroundColor="Transparent" TextColor="{StaticResource Muted}"
+                                            WidthRequest="44" HeightRequest="44" Padding="0" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

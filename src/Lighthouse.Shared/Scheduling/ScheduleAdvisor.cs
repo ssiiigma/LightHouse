@@ -75,4 +75,31 @@ public static class ScheduleAdvisor
 
         return result;
     }
+    
+    /// <summary>
+    /// Найпродуктивніший час доби для нагадування: середина найактивнішого чотиригодинного інтервалу за 90 діб
+    /// (потрібно щонайменше 10 виконаних завдань), інакше null.
+    /// </summary>
+    public static TimeSpan? SuggestTime(DateTime nowLocal, IEnumerable<DateTime> completedLocal)
+    {
+        var from = nowLocal.Date.AddDays(-(WindowDays - 1));
+        var counts = new int[6];
+        var sample = 0;
+        foreach (var moment in completedLocal)
+        {
+            if (moment >= from && moment <= nowLocal)
+            {
+                counts[moment.Hour / 4]++;
+                sample++;
+            }
+        }
+
+        if (sample < MinSample)
+        {
+            return null;
+        }
+
+        var best = Array.IndexOf(counts, counts.Max());
+        return TimeSpan.FromHours(best * 4 + 2);
+    }
 }

@@ -48,6 +48,7 @@ public sealed partial class TaskEditViewModel(ITaskSvc tasks, LocalizationServic
     private TimeSpan? _deadlineTime = new TimeSpan(18, 0, 0);
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowProductiveHint))]
     private bool _hasReminder;
 
     [ObservableProperty]
@@ -57,7 +58,7 @@ public sealed partial class TaskEditViewModel(ITaskSvc tasks, LocalizationServic
     private TimeSpan? _reminderTime = new TimeSpan(9, 0, 0);
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsLow), nameof(IsMedium), nameof(IsHigh), nameof(IsCritical))]
+    [NotifyPropertyChangedFor(nameof(IsLow), nameof(IsMedium), nameof(IsHigh), nameof(IsCritical), nameof(ShowProductiveHint))]
     private TaskPriority _priority = TaskPriority.Medium;
 
     [ObservableProperty]
@@ -108,6 +109,7 @@ public sealed partial class TaskEditViewModel(ITaskSvc tasks, LocalizationServic
         _initialized = true;
         _noCategory = new CategoryModel { Id = Guid.Empty, Name = loc["Form_NoCategory"] };
         await ReloadCategoriesAsync(selectId: null);
+        ProductiveTime = await tasks.GetProductiveTimeAsync();
 
         if (_pendingId is { } id)
         {
@@ -147,9 +149,31 @@ public sealed partial class TaskEditViewModel(ITaskSvc tasks, LocalizationServic
             return;
         }
 
-        var id = await tasks.SaveCategoryAsync(name);
+        var result = await tasks.AddCategoryAsync(name);
         NewCategoryName = string.Empty;
-        await ReloadCategoriesAsync(id);
+        CategoryInfo = result.Created ? null : loc["Cat_AlreadyExists"];
+        await ReloadCategoriesAsync(result.Id); // наявна категорія просто вибирається
+    }
+    
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowProductiveHint), nameof(ProductiveText))]
+    private TimeSpan? _productiveTime;
+
+    /// <summary>Підказка лише для High/Critical завдань, коли нагадування вимкнено або ще не прив'язане до часу, і час не пізніший за дедлайн.</summary>
+    public bool ShowProductiveHint =>
+        HasReminder && (Priority is TaskPriority.High or TaskPriority.Critical) && ProductiveTime is { } time
+        && (!HasDeadline || Combine(ReminderDate, time) < Combine(DeadlineDate, DeadlineTime));
+
+    public string ProductiveText =>
+        ProductiveTime is { } t ? loc.Get("Hint_Productive", t.ToString(@"hh\:mm")) : string.Empty;
+
+    [RelayCommand]
+    private void ApplyProductiveTime()
+    {
+        if (ProductiveTime is { } time)
+        {
+            ReminderTime = time;
+        }
     }
 
     [RelayCommand]
@@ -281,4 +305,22 @@ public sealed partial class TaskEditViewModel(ITaskSvc tasks, LocalizationServic
         DateTime.SpecifyKind(Combine(date, time), DateTimeKind.Local).ToUniversalTime();
 
     private static DateTime ToLocal(DateTime utc) => DateTime.SpecifyKind(utc, DateTimeKind.Utc).ToLocalTime();
+    
+    [ObservableProperty]
+    private string? _categoryInfo;
+
+    [RelayCommand]
+    private Task OpenCategoriesAsync() => Shell.Current.GoToAsync(nameof(Views.CategoriesPage));
+
+    /// <summary>Перше відкриття ініціалізує форму, наступні (повернення з екрана категорій) лише оновлюють список категорій.</summary>
+    public async Task OnAppearingAsync()
+    {
+        if (!_initialized)
+        {
+            await InitializeAsync();
+            return;
+        }
+
+        await ReloadCategoriesAsync(null);
+    }
 }

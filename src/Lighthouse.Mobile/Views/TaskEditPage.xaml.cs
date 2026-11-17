@@ -15,7 +15,7 @@ public partial class TaskEditPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await _viewModel.InitializeAsync();
+        await _viewModel.OnAppearingAsync();
     }
 
     private void OnRemoveSubtask(object? sender, EventArgs e)

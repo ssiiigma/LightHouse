@@ -3,21 +3,44 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lighthouse.Mobile.Localization;
 using Lighthouse.Mobile.Services.Auth;
+using Lighthouse.Mobile.Services.Notifications;
 using Lighthouse.Mobile.Services.Sync;
+using Lighthouse.Shared.Notifications;
 
 namespace Lighthouse.Mobile.ViewModels;
 
-/// <summary>Профіль: ім'я, пошта, мова, стан синхронізації й вихід. Решта налаштувань (сповіщення, календар, резервні копії) — у P4.4–P5.</summary>
-public sealed partial class ProfileViewModel(IAuth auth, ISyncSvc sync, LocalizationService loc) : ObservableObject
+/// <summary>Профіль і налаштування: ім'я, пошта, пояс, мова, сповіщення й тихий режим, синхронізація, вихід.</summary>
+public sealed partial class ProfileViewModel(
+    IAuth auth, ISyncSvc sync, LocalizationService loc,
+    INotifSettings notifSettings, INotif notif, ISystemSettings system) : ObservableObject
 {
+    private bool _loadingPrefs;
+
     [ObservableProperty] private string _name = string.Empty;
     [ObservableProperty] private string _email = string.Empty;
     [ObservableProperty] private string _initial = "?";
+    [ObservableProperty] private string _timeZoneText = string.Empty;
     [ObservableProperty] private bool _isUkrainian = true;
     [ObservableProperty] private bool _isEnglish;
+
+    [ObservableProperty] private bool _taskRemindersOn = true;
+    [ObservableProperty] private bool _habitRemindersOn = true;
+    [ObservableProperty] private bool _quietOn;
+    [ObservableProperty] private TimeSpan? _quietStart = new TimeSpan(22, 0, 0);
+    [ObservableProperty] private TimeSpan? _quietEnd = new TimeSpan(7, 0, 0);
+    [ObservableProperty] private bool _notificationsBlocked;
+    [ObservableProperty] private bool _exactBlocked;
+    [ObservableProperty] private bool _batteryRestricted;
+
     [ObservableProperty] private string _syncSummary = string.Empty;
     [ObservableProperty] private string _syncDetail = string.Empty;
     [ObservableProperty] private bool _hasParked;
+
+    partial void OnTaskRemindersOnChanged(bool value) => SavePrefs();
+    partial void OnHabitRemindersOnChanged(bool value) => SavePrefs();
+    partial void OnQuietOnChanged(bool value) => SavePrefs();
+    partial void OnQuietStartChanged(TimeSpan? value) => SavePrefs();
+    partial void OnQuietEndChanged(TimeSpan? value) => SavePrefs();
 
     public async Task LoadAsync()
     {
@@ -25,15 +48,38 @@ public sealed partial class ProfileViewModel(IAuth auth, ISyncSvc sync, Localiza
         Name = profile.Name;
         Email = profile.Email;
         Initial = Name.Length > 0 ? Name[..1].ToUpperInvariant() : "?";
-        RefreshLanguageFlags();
+        RefreshTexts();
+
+        _loadingPrefs = true;
+        var prefs = notifSettings.Load();
+        TaskRemindersOn = prefs.TaskReminders;
+        HabitRemindersOn = prefs.HabitReminders;
+        QuietOn = prefs.QuietEnabled;
+        QuietStart = prefs.QuietStart;
+        QuietEnd = prefs.QuietEnd;
+        _loadingPrefs = false;
+
+        await RefreshNotifStatusAsync();
         await RefreshSyncAsync();
+    }
+
+    private void SavePrefs()
+    {
+        if (_loadingPrefs)
+        {
+            return;
+        }
+
+        notifSettings.Save(new NotificationPrefs(
+            TaskRemindersOn, HabitRemindersOn, QuietOn,
+            QuietStart ?? new TimeSpan(22, 0, 0), QuietEnd ?? new TimeSpan(7, 0, 0)));
     }
 
     [RelayCommand]
     private void SetUkrainian()
     {
         loc.SetLanguage(LocalizationService.Ukrainian);
-        RefreshLanguageFlags();
+        RefreshTexts();
         _ = RefreshSyncAsync();
     }
 
@@ -41,14 +87,42 @@ public sealed partial class ProfileViewModel(IAuth auth, ISyncSvc sync, Localiza
     private void SetEnglish()
     {
         loc.SetLanguage(LocalizationService.English);
-        RefreshLanguageFlags();
+        RefreshTexts();
         _ = RefreshSyncAsync();
     }
+
+    [RelayCommand]
+    private Task OpenCategoriesAsync() => Shell.Current.GoToAsync(nameof(Views.CategoriesPage));
+
+    [RelayCommand]
+    private async Task GrantNotificationsAsync()
+    {
+        var granted = await notif.RequestPermissionAsync();
+        if (!granted)
+        {
+            system.OpenAppNotificationSettings(); // повторний запит системою блокується — користувач вмикає вручну
+        }
+
+        await RefreshNotifStatusAsync();
+    }
+
+    [RelayCommand]
+    private void GrantExact() => system.OpenExactAlarmSettings();
+
+    [RelayCommand]
+    private void OpenBattery() => system.OpenBatteryOptimizationSettings();
 
     [RelayCommand]
     private async Task SyncNowAsync()
     {
         await sync.SyncNowAsync();
+        await RefreshSyncAsync();
+    }
+
+    [RelayCommand]
+    private async Task FullResyncAsync()
+    {
+        await sync.FullResyncAsync();
         await RefreshSyncAsync();
     }
 
@@ -74,12 +148,13 @@ public sealed partial class ProfileViewModel(IAuth auth, ISyncSvc sync, Localiza
         await auth.LogoutAsync();
         await Shell.Current.GoToAsync("//welcome");
     }
-    
-    [RelayCommand]
-    private async Task FullResyncAsync()
+
+    private async Task RefreshNotifStatusAsync()
     {
-        await sync.FullResyncAsync();
-        await RefreshSyncAsync();
+        var status = await notif.GetStatusAsync();
+        NotificationsBlocked = !status.Enabled;
+        ExactBlocked = status.Enabled && !status.Exact;
+        BatteryRestricted = !status.BatteryUnrestricted;
     }
 
     private async Task RefreshSyncAsync()
@@ -103,9 +178,10 @@ public sealed partial class ProfileViewModel(IAuth auth, ISyncSvc sync, Localiza
         HasParked = d.Parked > 0;
     }
 
-    private void RefreshLanguageFlags()
+    private void RefreshTexts()
     {
         IsUkrainian = loc.Language == LocalizationService.Ukrainian;
         IsEnglish = !IsUkrainian;
+        TimeZoneText = loc.Get("Profile_TimeZone", TimeZoneInfo.Local.Id);
     }
 }
