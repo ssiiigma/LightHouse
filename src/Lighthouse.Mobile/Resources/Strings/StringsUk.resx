@@ -215,4 +215,31 @@
     <data name="Btn_Ok" xml:space="preserve"><value>Гаразд</value></data>
     <data name="Err_ResetInvalid" xml:space="preserve"><value>Код недійсний або прострочений.</value></data>
     <data name="Err_EnterCode" xml:space="preserve"><value>Введіть код з листа.</value></data>
+    <data name="Backup_Title" xml:space="preserve"><value>Резервні копії та дані</value></data>
+    <data name="Backup_Info" xml:space="preserve"><value>Копії зберігаються на сервері. Автоматична копія створюється щодоби за наявності змін, зберігаються 7 останніх. Ручних копій до 10.</value></data>
+    <data name="Backup_Create" xml:space="preserve"><value>Створити копію зараз</value></data>
+    <data name="Backup_List" xml:space="preserve"><value>Збережені копії</value></data>
+    <data name="Backup_Empty" xml:space="preserve"><value>Копій поки немає.</value></data>
+    <data name="Backup_Auto" xml:space="preserve"><value>автоматична</value></data>
+    <data name="Backup_Manual" xml:space="preserve"><value>вручну</value></data>
+    <data name="Backup_Restore" xml:space="preserve"><value>Відновити</value></data>
+    <data name="Backup_Created" xml:space="preserve"><value>Копію створено.</value></data>
+    <data name="Backup_RestoreTitle" xml:space="preserve"><value>Відновлення</value></data>
+    <data name="Backup_RestoreConfirm" xml:space="preserve"><value>Поточні дані буде замінено даними з копії від {0}. Перед цим автоматично зберігається копія поточного стану. Продовжити?</value></data>
+    <data name="Backup_Restored" xml:space="preserve"><value>Відновлено: завдань {0}, звичок {1}, категорій {2}. Копію попереднього стану збережено.</value></data>
+    <data name="Backup_DeleteTitle" xml:space="preserve"><value>Видалення копії</value></data>
+    <data name="Backup_DeleteConfirm" xml:space="preserve"><value>Видалити копію від {0}?</value></data>
+    <data name="Backup_NoNetwork" xml:space="preserve"><value>Для цієї дії потрібне з'єднання з мережею.</value></data>
+    <data name="Backup_PendingChanges" xml:space="preserve"><value>На пристрої є не синхронізовані зміни. Дочекайтеся синхронізації й повторіть.</value></data>
+    <data name="Backup_Conflict" xml:space="preserve"><value>Не вдалося виконати дію: перевищено ліміт (10 ручних копій) або виник конфлікт даних.</value></data>
+    <data name="Backup_BadFile" xml:space="preserve"><value>Файл не вдалося прочитати. Перевірте формат (JSON або CSV).</value></data>
+    <data name="Export_Section" xml:space="preserve"><value>Експорт</value></data>
+    <data name="Export_Json" xml:space="preserve"><value>JSON (усі дані)</value></data>
+    <data name="Export_Csv" xml:space="preserve"><value>CSV (завдання)</value></data>
+    <data name="Import_Section" xml:space="preserve"><value>Імпорт</value></data>
+    <data name="Import_Hint" xml:space="preserve"><value>Імпорт додає записи як нові; категорії з однаковою назвою об'єднуються. Для CSV потрібен стовпець Title.</value></data>
+    <data name="Import_Button" xml:space="preserve"><value>Імпортувати з файлу</value></data>
+    <data name="Import_Pick" xml:space="preserve"><value>Оберіть файл JSON або CSV</value></data>
+    <data name="Import_Done" xml:space="preserve"><value>Додано: завдань {0}, звичок {1}, нових категорій {2}. Пропущено: {3}.</value></data>
+    <data name="Import_TooBig" xml:space="preserve"><value>Файл завеликий (максимум 5 МБ).</value></data>
 </root>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Lighthouse.Mobile.ViewModels"
+             xmlns:conv="clr-namespace:Lighthouse.Mobile.Converters"
+             xmlns:controls="clr-namespace:Lighthouse.Mobile.Controls"
+             xmlns:loc="clr-namespace:Lighthouse.Mobile.Localization"
+             x:Class="Lighthouse.Mobile.Views.BackupsPage"
+             x:DataType="vm:BackupsViewModel"
+             Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <conv:StringToBoolConverter x:Key="StringToBoolConverter" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*">
+
+        <Grid Padding="20,52,20,8" ColumnDefinitions="Auto,*" ColumnSpacing="12">
+            <Button Text="‹" Command="{Binding GoBackCommand}" WidthRequest="40" HeightRequest="40" Padding="0"
+                    FontSize="24" CornerRadius="12" BackgroundColor="{StaticResource Card}"
+                    BorderColor="{StaticResource Dim}" BorderWidth="1" TextColor="{StaticResource Cream}" />
+            <Label Grid.Column="1" Text="{loc:Translate Backup_Title}" FontFamily="DMSansSemibold" FontSize="20"
+                   VerticalOptions="Center" />
+        </Grid>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="16,8,16,32" Spacing="12">
+
+                <Label Text="{loc:Translate Backup_Info}" Style="{StaticResource SubtitleLabel}" FontSize="12" />
+                <controls:NoticeView Text="{Binding InfoMessage}" />
+                <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Red}"
+                       IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBoolConverter}}" />
+                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+
+                <Button Text="{loc:Translate Backup_Create}" Style="{StaticResource PrimaryButton}" HeightRequest="48"
+                        Command="{Binding CreateCommand}" />
+
+                <Label Text="{loc:Translate Backup_List}" Style="{StaticResource SectionLabel}" Margin="0,8,0,0" />
+                <Label Text="{loc:Translate Backup_Empty}" Style="{StaticResource SubtitleLabel}"
+                       HorizontalTextAlignment="Center" IsVisible="{Binding IsEmpty}" />
+
+                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding Items}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:BackupItem">
+                            <Border Style="{StaticResource CardBorder}" Padding="14,8">
+                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
+                                    <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                                        <Label Text="{Binding Title}" FontFamily="DMSansMedium" />
+                                        <Label Text="{Binding Detail}" Style="{StaticResource CaptionLabel}" />
+                                    </VerticalStackLayout>
+                                    <Button Grid.Column="1" Text="{loc:Translate Backup_Restore}" Clicked="OnRestoreClicked"
+                                            Style="{StaticResource GhostButton}" HeightRequest="40" Padding="10,0" />
+                                    <Button Grid.Column="2" Text="✕" Clicked="OnDeleteClicked"
+                                            BackgroundColor="Transparent" TextColor="{StaticResource Muted}"
+                                            WidthRequest="44" HeightRequest="44" Padding="0" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <Label Text="{loc:Translate Export_Section}" Style="{StaticResource SectionLabel}" Margin="0,12,0,0" />
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <Button Text="{loc:Translate Export_Json}" Style="{StaticResource SecondaryButton}" HeightRequest="48"
+                            Command="{Binding ExportCommand}" CommandParameter="json" />
+                    <Button Grid.Column="1" Text="{loc:Translate Export_Csv}" Style="{StaticResource SecondaryButton}"
+                            HeightRequest="48" Command="{Binding ExportCommand}" CommandParameter="csv" />
+                </Grid>
+
+                <Label Text="{loc:Translate Import_Section}" Style="{StaticResource SectionLabel}" Margin="0,12,0,0" />
+                <Label Text="{loc:Translate Import_Hint}" Style="{StaticResource SubtitleLabel}" FontSize="12" />
+                <Button Text="{loc:Translate Import_Button}" Style="{StaticResource SecondaryButton}" HeightRequest="48"
+                        Command="{Binding ImportCommand}" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

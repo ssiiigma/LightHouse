@@ -51,6 +51,8 @@ internal static class TestEnvironment
             // Змінні середовища мають вищий пріоритет за appsettings і user-secrets.
             Environment.SetEnvironmentVariable("ConnectionStrings__Default", connection.ConnectionString);
             Environment.SetEnvironmentVariable("Recommendations__ModelTrainingEnabled", "false");
+            Environment.SetEnvironmentVariable("Workers__BackupEnabled", "false");
+            Environment.SetEnvironmentVariable("Workers__MaintenanceEnabled", "false");
             AppDomain.CurrentDomain.ProcessExit += (_, _) => DropDatabase();
         }
     }

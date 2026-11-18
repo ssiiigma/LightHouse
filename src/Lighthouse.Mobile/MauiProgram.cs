@@ -54,6 +54,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<ISystemSettings, AndroidSystemSettings>();
         builder.Services.AddSingleton<INotifSettings, NotificationSettingsStore>();
         builder.Services.AddSingleton<INotif, NotifManager>();
+        builder.Services.AddSingleton<Services.Backups.IBackup, Services.Backups.BackupService>();
 
         // Екрани.
         builder.Services.AddTransient<ViewModels.WelcomeViewModel>();
@@ -79,6 +80,8 @@ public static class MauiProgram
         builder.Services.AddTransient<Views.CategoriesPage>();
         builder.Services.AddTransient<ViewModels.ForgotPasswordViewModel>();
         builder.Services.AddTransient<Views.ForgotPasswordPage>();
+        builder.Services.AddTransient<ViewModels.BackupsViewModel>();
+        builder.Services.AddTransient<Views.BackupsPage>();
         
 #if DEBUG
         builder.Logging.AddDebug();

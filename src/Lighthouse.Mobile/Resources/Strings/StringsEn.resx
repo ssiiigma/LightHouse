@@ -215,4 +215,31 @@
     <data name="Btn_Ok" xml:space="preserve"><value>OK</value></data>
     <data name="Err_ResetInvalid" xml:space="preserve"><value>The code is invalid or has expired.</value></data>
     <data name="Err_EnterCode" xml:space="preserve"><value>Enter the code from the email.</value></data>
+    <data name="Backup_Title" xml:space="preserve"><value>Backups and data</value></data>
+    <data name="Backup_Info" xml:space="preserve"><value>Backups are stored on the server. An automatic backup is made daily when data has changed (the last 7 are kept). Up to 10 manual backups.</value></data>
+    <data name="Backup_Create" xml:space="preserve"><value>Create a backup now</value></data>
+    <data name="Backup_List" xml:space="preserve"><value>Saved backups</value></data>
+    <data name="Backup_Empty" xml:space="preserve"><value>No backups yet.</value></data>
+    <data name="Backup_Auto" xml:space="preserve"><value>automatic</value></data>
+    <data name="Backup_Manual" xml:space="preserve"><value>manual</value></data>
+    <data name="Backup_Restore" xml:space="preserve"><value>Restore</value></data>
+    <data name="Backup_Created" xml:space="preserve"><value>Backup created.</value></data>
+    <data name="Backup_RestoreTitle" xml:space="preserve"><value>Restore</value></data>
+    <data name="Backup_RestoreConfirm" xml:space="preserve"><value>Your current data will be replaced with the data from the backup of {0}. A backup of the current state is saved first. Continue?</value></data>
+    <data name="Backup_Restored" xml:space="preserve"><value>Restored: tasks {0}, habits {1}, categories {2}. A backup of the previous state was saved.</value></data>
+    <data name="Backup_DeleteTitle" xml:space="preserve"><value>Delete backup</value></data>
+    <data name="Backup_DeleteConfirm" xml:space="preserve"><value>Delete the backup of {0}?</value></data>
+    <data name="Backup_NoNetwork" xml:space="preserve"><value>A network connection is required for this action.</value></data>
+    <data name="Backup_PendingChanges" xml:space="preserve"><value>There are unsynced changes on this device. Wait for synchronization and try again.</value></data>
+    <data name="Backup_Conflict" xml:space="preserve"><value>The action failed: the limit (10 manual backups) is reached or the data conflicts.</value></data>
+    <data name="Backup_BadFile" xml:space="preserve"><value>The file could not be read. Check the format (JSON or CSV).</value></data>
+    <data name="Export_Section" xml:space="preserve"><value>Export</value></data>
+    <data name="Export_Json" xml:space="preserve"><value>JSON (all data)</value></data>
+    <data name="Export_Csv" xml:space="preserve"><value>CSV (tasks)</value></data>
+    <data name="Import_Section" xml:space="preserve"><value>Import</value></data>
+    <data name="Import_Hint" xml:space="preserve"><value>Import adds records as new ones; categories with the same name are merged. CSV needs a Title column.</value></data>
+    <data name="Import_Button" xml:space="preserve"><value>Import from a file</value></data>
+    <data name="Import_Pick" xml:space="preserve"><value>Choose a JSON or CSV file</value></data>
+    <data name="Import_Done" xml:space="preserve"><value>Added: tasks {0}, habits {1}, new categories {2}. Skipped: {3}.</value></data>
+    <data name="Import_TooBig" xml:space="preserve"><value>The file is too large (5 MB maximum).</value></data>
 </root>

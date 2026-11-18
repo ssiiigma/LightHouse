@@ -13,6 +13,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(Views.HabitEditPage), typeof(Views.HabitEditPage));
         Routing.RegisterRoute(nameof(Views.CategoriesPage), typeof(Views.CategoriesPage));
         Routing.RegisterRoute(nameof(Views.ForgotPasswordPage), typeof(Views.ForgotPasswordPage));
+        Routing.RegisterRoute(nameof(Views.BackupsPage), typeof(Views.BackupsPage));
 
         ApplyTitles();
         LocalizationService.Instance.PropertyChanged += (_, _) => ApplyTitles();

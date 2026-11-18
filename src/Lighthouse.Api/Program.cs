@@ -14,6 +14,7 @@ using Lighthouse.Api.Services.Tasks;
 using Lighthouse.Core.AI;
 using Lighthouse.Api.Services.Reports;
 using Lighthouse.Api.Services.Email;
+using Lighthouse.Api.Services.Backups;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
@@ -101,6 +102,22 @@ builder.Services.AddScoped<UserHistoryBuilder>();
 builder.Services.AddScoped<ModelTrainer>();
 builder.Services.AddScoped<IRecommendationService, RecommendationService>();
 builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<BackupSnapshotBuilder>();
+builder.Services.AddScoped<BackupApplier>();
+builder.Services.AddScoped<IBackupService, BackupService>();
+builder.Services.AddScoped<IDataTransferService, DataTransferService>();
+builder.Services.AddScoped<BackupScheduler>();
+builder.Services.AddScoped<ArchiveCleaner>();
+
+if (builder.Configuration.GetValue("Workers:BackupEnabled", true))
+{
+    builder.Services.AddHostedService<BackupWorker>();
+}
+
+if (builder.Configuration.GetValue("Workers:MaintenanceEnabled", true))
+{
+    builder.Services.AddHostedService<MaintenanceWorker>();
+}
 
 if (builder.Configuration.GetValue("Recommendations:ModelTrainingEnabled", true))
 {

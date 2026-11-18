@@ -66,6 +66,26 @@
                            VerticalOptions="Center" />
                 </Grid>
             </Border>
+            
+            <!-- Резервні копії та дані -->
+            <Border Style="{StaticResource CardBorder}" Padding="16,14">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding OpenBackupsCommand}" />
+                </Border.GestureRecognizers>
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                    <Border WidthRequest="34" HeightRequest="34" StrokeThickness="0" BackgroundColor="#334CAF7D">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10" />
+                        </Border.StrokeShape>
+                        <Label Text="↧" FontFamily="DMSansBold" FontSize="16" TextColor="#7BD9A5"
+                               HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                    <Label Grid.Column="1" Text="{loc:Translate Backup_Title}" FontFamily="DMSansMedium"
+                           VerticalOptions="Center" />
+                    <Label Grid.Column="2" Text="›" FontSize="22" TextColor="{StaticResource GoldLight}"
+                           VerticalOptions="Center" />
+                </Grid>
+            </Border>
 
             <!-- Мова -->
             <Label Text="{loc:Translate Settings_Language}" Style="{StaticResource SectionLabel}" Margin="0,8,0,0" />

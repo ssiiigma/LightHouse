@@ -184,4 +184,7 @@ public sealed partial class ProfileViewModel(
         IsEnglish = !IsUkrainian;
         TimeZoneText = loc.Get("Profile_TimeZone", TimeZoneInfo.Local.Id);
     }
+    
+    [RelayCommand]
+    private Task OpenBackupsAsync() => Shell.Current.GoToAsync(nameof(Views.BackupsPage));
 }
