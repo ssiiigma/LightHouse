@@ -170,7 +170,7 @@ public sealed class AccountApiTests(ApiFixture fixture)
         var client = factory.CreateClient();
         await Forgot(client, user.Email);
 
-        var confirmToken = TokenFrom(factory.Emails.To(user.Email).First(m => m.Subject.Contains("Confirm")));
+        var confirmToken = TokenFrom(factory.Emails.To(user.Email).First(m => !m.Subject.Contains("Reset")));
         var resetToken = TokenFrom(ResetMails(factory.Emails.To(user.Email)).Single());
         await client.GetAsync($"/api/auth/confirm-email?token={confirmToken}");
         await Reset(client, resetToken, NewPassword);

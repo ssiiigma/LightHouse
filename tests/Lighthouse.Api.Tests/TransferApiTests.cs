@@ -6,6 +6,7 @@ using Lighthouse.Shared.Contracts.Categories;
 using Lighthouse.Shared.Contracts.Habits;
 using Lighthouse.Shared.Contracts.Tasks;
 using Lighthouse.Shared.Enums;
+using Lighthouse.Api.Controllers;
 
 namespace Lighthouse.Api.Tests;
 
@@ -117,5 +118,16 @@ public sealed class TransferApiTests(ApiFixture fixture)
         Assert.Equal(HttpStatusCode.Unauthorized, (await anonymous.GetAsync("/api/data/export?format=json")).StatusCode);
         Assert.Equal(HttpStatusCode.Unauthorized,
             (await anonymous.PostAsync("/api/data/import?format=json", new StringContent("{}"))).StatusCode);
+    }
+    
+    [SqlServerFact]
+    public async Task Import_RejectsFilesOverTheLimit()
+    {
+        var user = await fixture.Factory.RegisterAsync();
+
+        var response = await user.Client.PostAsync(
+            "/api/data/import?format=csv", new ByteArrayContent(new byte[DataController.MaxImportBytes + 1]));
+
+        Assert.Equal(HttpStatusCode.RequestEntityTooLarge, response.StatusCode);
     }
 }

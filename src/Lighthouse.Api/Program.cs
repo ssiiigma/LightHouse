@@ -15,6 +15,7 @@ using Lighthouse.Core.AI;
 using Lighthouse.Api.Services.Reports;
 using Lighthouse.Api.Services.Email;
 using Lighthouse.Api.Services.Backups;
+using Lighthouse.Api.Services.Notifications;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
@@ -108,6 +109,8 @@ builder.Services.AddScoped<IBackupService, BackupService>();
 builder.Services.AddScoped<IDataTransferService, DataTransferService>();
 builder.Services.AddScoped<BackupScheduler>();
 builder.Services.AddScoped<ArchiveCleaner>();
+builder.Services.AddScoped<INotificationSettingsService, NotificationSettingsService>();
+builder.Services.AddScoped<IDeviceService, DeviceService>();
 
 if (builder.Configuration.GetValue("Workers:BackupEnabled", true))
 {

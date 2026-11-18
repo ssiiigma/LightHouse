@@ -43,6 +43,9 @@
                         <Label Text="{Binding Name}" FontFamily="DMSansSemibold" FontSize="16" />
                         <Label Text="{Binding Email}" Style="{StaticResource SubtitleLabel}" FontSize="12" />
                         <Label Text="{Binding TimeZoneText}" Style="{StaticResource CaptionLabel}" />
+                        <Button Text="{loc:Translate Profile_EditName}" Command="{Binding EditNameCommand}"
+                                Style="{StaticResource GhostButton}" HorizontalOptions="Start"
+                                HeightRequest="36" Padding="0" />
                     </VerticalStackLayout>
                 </Grid>
             </Border>

@@ -55,6 +55,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<INotifSettings, NotificationSettingsStore>();
         builder.Services.AddSingleton<INotif, NotifManager>();
         builder.Services.AddSingleton<Services.Backups.IBackup, Services.Backups.BackupService>();
+        builder.Services.AddSingleton<INotifSettingsSync, NotifSettingsSync>();
 
         // Екрани.
         builder.Services.AddTransient<ViewModels.WelcomeViewModel>();

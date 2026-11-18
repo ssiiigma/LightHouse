@@ -23,10 +23,26 @@ public sealed class DataController(IDataTransferService data) : ApiControllerBas
     /// <summary>Імпорт: тіло запиту — вміст файлу (до 5 МБ); записи додаються як нові.</summary>
     [HttpPost("import")]
     [RequestSizeLimit(MaxImportBytes)]
-    public async Task<ActionResult<ImportResultDto>> Import([FromQuery] string? format, CancellationToken ct)
+    public async Task<ActionResult<ImportResultDto>> Import([FromQuery] string? format, CancellationToken ct) =>
+        Ok(await data.ImportAsync(
+            User.GetUserId(), format ?? string.Empty, await ReadLimitedAsync(Request.Body, MaxImportBytes, ct), ct));
+
+    /// <summary>Читає тіло запиту й перериває, щойно перевищено ліміт (працює незалежно від налаштувань сервера).</summary>
+    private static async Task<byte[]> ReadLimitedAsync(Stream body, int maxBytes, CancellationToken ct)
     {
         using var buffer = new MemoryStream();
-        await Request.Body.CopyToAsync(buffer, ct);
-        return Ok(await data.ImportAsync(User.GetUserId(), format ?? string.Empty, buffer.ToArray(), ct));
+        var chunk = new byte[81920];
+        int read;
+        while ((read = await body.ReadAsync(chunk, ct)) > 0)
+        {
+            if (buffer.Length + read > maxBytes)
+            {
+                throw new AppException(StatusCodes.Status413PayloadTooLarge, "The file is too large.");
+            }
+
+            buffer.Write(chunk, 0, read);
+        }
+
+        return buffer.ToArray();
     }
 }

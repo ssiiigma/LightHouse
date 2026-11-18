@@ -12,7 +12,7 @@ namespace Lighthouse.Mobile.ViewModels;
 /// <summary>Профіль і налаштування: ім'я, пошта, пояс, мова, сповіщення й тихий режим, синхронізація, вихід.</summary>
 public sealed partial class ProfileViewModel(
     IAuth auth, ISyncSvc sync, LocalizationService loc,
-    INotifSettings notifSettings, INotif notif, ISystemSettings system) : ObservableObject
+    INotifSettings notifSettings, INotif notif, ISystemSettings system, INotifSettingsSync settingsSync) : ObservableObject
 {
     private bool _loadingPrefs;
 
@@ -50,6 +50,14 @@ public sealed partial class ProfileViewModel(
         Initial = Name.Length > 0 ? Name[..1].ToUpperInvariant() : "?";
         RefreshTexts();
 
+        LoadPrefs(); _ = RefreshSettingsFromServerAsync();
+
+        await RefreshNotifStatusAsync();
+        await RefreshSyncAsync();
+    }
+    
+    private void LoadPrefs()
+    {
         _loadingPrefs = true;
         var prefs = notifSettings.Load();
         TaskRemindersOn = prefs.TaskReminders;
@@ -58,9 +66,40 @@ public sealed partial class ProfileViewModel(
         QuietStart = prefs.QuietStart;
         QuietEnd = prefs.QuietEnd;
         _loadingPrefs = false;
+    }
 
-        await RefreshNotifStatusAsync();
-        await RefreshSyncAsync();
+    /// <summary>Підтягує налаштування із сервера у фоні й оновлює перемикачі.</summary>
+    private async Task RefreshSettingsFromServerAsync()
+    {
+        if (await settingsSync.SyncAsync())
+        {
+            MainThread.BeginInvokeOnMainThread(LoadPrefs);
+        }
+    }
+
+    [RelayCommand]
+    private async Task EditNameAsync()
+    {
+        var name = await Shell.Current.DisplayPromptAsync(
+            loc["Profile_EditName"], loc["Profile_NamePrompt"], loc["Btn_Save"], loc["Btn_Cancel"],
+            maxLength: 100, initialValue: Name);
+        if (string.IsNullOrWhiteSpace(name) || name.Trim() == Name)
+        {
+            return;
+        }
+
+        try
+        {
+            await auth.UpdateNameAsync(name.Trim());
+            var profile = await auth.GetProfileAsync();
+            Name = profile.Name;
+            Initial = Name.Length > 0 ? Name[..1].ToUpperInvariant() : "?";
+        }
+        catch (Exception)
+        {
+            await Shell.Current.DisplayAlertAsync(
+                loc["Profile_EditName"], loc["Backup_NoNetwork"], loc["Btn_Ok"]);
+        }
     }
 
     private void SavePrefs()

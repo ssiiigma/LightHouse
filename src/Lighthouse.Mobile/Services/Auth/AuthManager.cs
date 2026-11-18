@@ -6,6 +6,8 @@ using Lighthouse.Mobile.Services.Notifications;
 using Lighthouse.Mobile.Services.Sync;
 using Lighthouse.Shared.Contracts.Auth;
 using Lighthouse.Mobile.Localization;
+using Lighthouse.Mobile.Services.Notifications;
+using Lighthouse.Shared.Contracts.Profile;
 
 namespace Lighthouse.Mobile.Services.Auth;
 
@@ -31,6 +33,7 @@ public interface IAuth
     Task RequestPasswordResetAsync(string email, CancellationToken ct = default);
 
     Task ResetPasswordAsync(string token, string newPassword, CancellationToken ct = default);
+    Task UpdateNameAsync(string name, CancellationToken ct = default);
 }
 
 public sealed class AuthManager : IAuth
@@ -40,16 +43,18 @@ public sealed class AuthManager : IAuth
     private readonly ILocalDB _localDb;
     private readonly ISyncSvc _sync;
     private readonly INotif _notif;
+    private readonly INotifSettingsSync _settingsSync;
 
     public event Action? SessionExpired;
 
-    public AuthManager(IApiClient api, ISecureStore secureStore, ILocalDB localDb, ISyncSvc sync, INotif notif)
+    public AuthManager(IApiClient api, ISecureStore secureStore, ILocalDB localDb, ISyncSvc sync, INotif notif, INotifSettingsSync settingsSync)
     {
         _api = api;
         _secureStore = secureStore;
         _localDb = localDb;
         _sync = sync;
         _notif = notif;
+        _settingsSync = settingsSync;
         _api.SessionExpired += () =>
         {
             _sync.Stop();
@@ -136,6 +141,7 @@ public sealed class AuthManager : IAuth
             using var limit = new CancellationTokenSource(TimeSpan.FromSeconds(20));
             await _sync.SyncNowAsync(limit.Token);
             _notif.RequestReschedule();
+            _settingsSync.RequestSync();
         }
         catch (Exception)
         {
@@ -155,6 +161,7 @@ public sealed class AuthManager : IAuth
         Preferences.Default.Remove(PreferenceKeys.UserEmail);
         AdviceStore.Clear();
         Preferences.Default.Remove(PreferenceKeys.TimeZoneSent);
+        _settingsSync.Reset();
     }
 
     /// <summary>Читає claim-и name і email з корисного навантаження JWT (підпис тут не перевіряється: дані лише для відображення).</summary>
@@ -187,4 +194,11 @@ public sealed class AuthManager : IAuth
 
     public Task ResetPasswordAsync(string token, string newPassword, CancellationToken ct = default) =>
         _api.ResetPasswordAsync(token, newPassword, ct);
+    
+    public async Task UpdateNameAsync(string name, CancellationToken ct = default)
+    {
+        var profile = await _api.PutAsync<UpdateProfileRequest, ProfileDto>(
+            "api/profile", new UpdateProfileRequest(name), ct);
+        Preferences.Default.Set(PreferenceKeys.UserName, profile.Name);
+    }
 }
