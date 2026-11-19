@@ -66,4 +66,21 @@ public sealed partial class LoginViewModel(IAuth auth, LocalizationService loc) 
     
     [RelayCommand]
     private Task ForgotPasswordAsync() => Shell.Current.GoToAsync(nameof(Views.ForgotPasswordPage));
+    
+    [RelayCommand]
+    private async Task GoogleSignInAsync()
+    {
+        if (IsBusy) return;
+
+        ErrorMessage = null;
+        IsBusy = true;
+        try
+        {
+            ErrorMessage = await GoogleSignInFlow.RunAsync(auth, loc);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
 }

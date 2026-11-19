@@ -8,4 +8,9 @@
 	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 	<uses-permission android:name="android.permission.VIBRATE" />
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
+	<queries>
+		<intent>
+			<action android:name="android.support.customtabs.action.CustomTabsService" />
+		</intent>
+	</queries>
 </manifest>

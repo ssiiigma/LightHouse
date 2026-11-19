@@ -5,6 +5,7 @@
              xmlns:vm="clr-namespace:Lighthouse.Mobile.ViewModels"
              xmlns:conv="clr-namespace:Lighthouse.Mobile.Converters"
              xmlns:loc="clr-namespace:Lighthouse.Mobile.Localization"
+             xmlns:controls="clr-namespace:Lighthouse.Mobile.Controls"
              x:Class="Lighthouse.Mobile.Views.LoginPage"
              x:DataType="vm:LoginViewModel"
              Shell.NavBarIsVisible="False">
@@ -34,6 +35,9 @@
             <Button Text="{loc:Translate Btn_SignIn}" Style="{StaticResource PrimaryButton}" Margin="0,12,0,0"
                     Command="{Binding LoginCommand}"
                     IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}" />
+            
+            <Label Text="{loc:Translate Auth_Or}" Style="{StaticResource CaptionLabel}" HorizontalOptions="Center" />
+            <controls:GoogleSignInButton Text="{loc:Translate Google_Continue}" Command="{Binding GoogleSignInCommand}" />
 
             <Button Text="{loc:Translate Login_Forgot}" Style="{StaticResource GhostButton}"
                     Command="{Binding ForgotPasswordCommand}" />

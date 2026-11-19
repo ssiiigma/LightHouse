@@ -668,7 +668,7 @@ namespace Lighthouse.Api.Data.Migrations
                     b.Property<int>("FailedLoginCount")
                         .HasColumnType("int");
 
-                    b.Property<string>("GoogleSubject")
+                    b.Property<string>("GoogleId")
                         .HasMaxLength(64)
                         .HasColumnType("nvarchar(64)");
 

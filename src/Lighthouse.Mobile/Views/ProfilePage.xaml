@@ -2,6 +2,7 @@
 
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:vm="clr-namespace:Lighthouse.Mobile.ViewModels"
              xmlns:conv="clr-namespace:Lighthouse.Mobile.Converters"
              xmlns:controls="clr-namespace:Lighthouse.Mobile.Controls"
@@ -23,10 +24,10 @@
                 <Label Text="{loc:Translate Settings_Title}" Style="{StaticResource TitleLabel}" />
             </VerticalStackLayout>
 
-            <!-- Профіль -->
+                        <!-- Профіль -->
             <Border Style="{StaticResource CardBorder}" Padding="16">
-                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
-                    <Border WidthRequest="52" HeightRequest="52" StrokeThickness="0">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                    <Border WidthRequest="56" HeightRequest="56" StrokeThickness="0" VerticalOptions="Center">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="16" />
                         </Border.StrokeShape>
@@ -36,17 +37,30 @@
                                 <GradientStop Color="#8B5A10" Offset="1" />
                             </LinearGradientBrush>
                         </Border.Background>
-                        <Label Text="{Binding Initial}" FontFamily="DMSansSemibold" FontSize="21" TextColor="White"
+                        <Label Text="{Binding Initial}" FontFamily="DMSansSemibold" FontSize="22" TextColor="White"
                                HorizontalOptions="Center" VerticalOptions="Center" />
                     </Border>
+
                     <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                        <Label Text="{Binding Name}" FontFamily="DMSansSemibold" FontSize="16" />
-                        <Label Text="{Binding Email}" Style="{StaticResource SubtitleLabel}" FontSize="12" />
+                        <Label Text="{Binding Name}" FontFamily="DMSansSemibold" FontSize="16"
+                               LineBreakMode="TailTruncation" />
+                        <Label Text="{Binding Email}" Style="{StaticResource SubtitleLabel}" FontSize="12"
+                               LineBreakMode="TailTruncation" />
                         <Label Text="{Binding TimeZoneText}" Style="{StaticResource CaptionLabel}" />
-                        <Button Text="{loc:Translate Profile_EditName}" Command="{Binding EditNameCommand}"
-                                Style="{StaticResource GhostButton}" HorizontalOptions="Start"
-                                HeightRequest="36" Padding="0" />
                     </VerticalStackLayout>
+
+                    <HorizontalStackLayout Grid.Column="2" Spacing="5" Padding="8,6" VerticalOptions="Start">
+                        <HorizontalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding EditNameCommand}" />
+                        </HorizontalStackLayout.GestureRecognizers>
+                        <Image Source="icon_edit.png" WidthRequest="13" HeightRequest="13" VerticalOptions="Center">
+                            <Image.Behaviors>
+                                <toolkit:IconTintColorBehavior TintColor="{StaticResource GoldLight}" />
+                            </Image.Behaviors>
+                        </Image>
+                        <Label Text="{loc:Translate Profile_EditName}" FontSize="11" TextColor="{StaticResource GoldLight}"
+                               VerticalOptions="Center" />
+                    </HorizontalStackLayout>
                 </Grid>
             </Border>
 

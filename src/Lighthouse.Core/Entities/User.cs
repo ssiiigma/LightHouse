@@ -7,7 +7,7 @@ public class User : BaseEntity
 
     /// <summary>bcrypt-хеш; null для облікових записів, створених лише через Google.</summary>
     public string? PasswordHash { get; set; }
-    public string? GoogleSubject { get; set; }
+    public string? GoogleId { get; set; }
     public bool IsEmailConfirmed { get; set; }
 
     public int FailedLoginCount { get; set; }

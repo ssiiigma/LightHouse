@@ -92,5 +92,12 @@ public sealed class AuthController(IAuthService auth, IAccountService accounts) 
         }
     }
 
-    // TODO (P5.5): POST /api/auth/google (GoogleLoginRequest): перевірка ID-токена.
+    /// <summary>Вхід через Google: ID-токен перевіряється сервером; акаунт прив'язується за Google-ідентифікатором або e-mail.</summary>
+    [HttpPost("google")]
+    public async Task<ActionResult<AuthResponse>> Google(
+        GoogleLoginRequest request, [FromServices] IValidator<GoogleLoginRequest> validator, CancellationToken ct)
+    {
+        if (await ValidateAsync(validator, request, ct) is { } invalid) return invalid;
+        return Ok(await auth.GoogleLoginAsync(request, ct));
+    }
 }

@@ -23,6 +23,7 @@ public interface IApiClient
     Task DeleteAsync(string path, CancellationToken ct);
     Task<TResponse> PostAsync<TRequest, TResponse>(string path, TRequest body, CancellationToken ct);
     Task<TResponse> PostBytesAsync<TResponse>(string path, byte[] body, string contentType, CancellationToken ct);
+    Task<AuthResponse> GoogleLoginAsync(string idToken, CancellationToken ct);
 }
 
 public sealed class ApiClient(HttpClient http, ISecureStore secureStore) : IApiClient
@@ -196,6 +197,12 @@ public sealed class ApiClient(HttpClient http, ISecureStore secureStore) : IApiC
         }, ct);
         await EnsureSuccessAsync(response, ct);
         return await ReadBodyAsync<TResponse>(response, ct);
+    }
+    
+    public async Task<AuthResponse> GoogleLoginAsync(string idToken, CancellationToken ct)
+    {
+        using var response = await http.PostAsJsonAsync("api/auth/google", new GoogleLoginRequest(idToken), ct);
+        return await ReadAuthResponseAsync(response, ct);
     }
 }
 

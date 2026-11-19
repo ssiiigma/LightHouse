@@ -244,4 +244,8 @@
     <data name="Import_TooBig" xml:space="preserve"><value>Файл завеликий (максимум 5 МБ).</value></data>
     <data name="Profile_EditName" xml:space="preserve"><value>Змінити ім'я</value></data>
     <data name="Profile_NamePrompt" xml:space="preserve"><value>Введіть нове ім'я</value></data>
+    <data name="Google_Continue" xml:space="preserve"><value>Продовжити з Google</value></data>
+    <data name="Auth_Or" xml:space="preserve"><value>або</value></data>
+    <data name="Err_GoogleFailed" xml:space="preserve"><value>Не вдалося увійти через Google. Спробуйте ще раз.</value></data>
+    <data name="Err_GoogleConflict" xml:space="preserve"><value>Ця адреса вже прив'язана до іншого облікового запису Google.</value></data>
 </root>

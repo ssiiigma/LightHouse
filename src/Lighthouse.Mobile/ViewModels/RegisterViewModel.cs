@@ -76,4 +76,21 @@ public sealed partial class RegisterViewModel(IAuth auth, LocalizationService lo
         if (Password != ConfirmPassword) return loc["Err_PasswordMismatch"];
         return null;
     }
+    
+    [RelayCommand]
+    private async Task GoogleSignInAsync()
+    {
+        if (IsBusy) return;
+
+        ErrorMessage = null;
+        IsBusy = true;
+        try
+        {
+            ErrorMessage = await GoogleSignInFlow.RunAsync(auth, loc);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
 }

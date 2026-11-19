@@ -34,6 +34,7 @@ public interface IAuth
 
     Task ResetPasswordAsync(string token, string newPassword, CancellationToken ct = default);
     Task UpdateNameAsync(string name, CancellationToken ct = default);
+    Task<bool> LoginWithGoogleAsync(CancellationToken ct = default);
 }
 
 public sealed class AuthManager : IAuth
@@ -44,10 +45,12 @@ public sealed class AuthManager : IAuth
     private readonly ISyncSvc _sync;
     private readonly INotif _notif;
     private readonly INotifSettingsSync _settingsSync;
+    private readonly IGoogleAuth _google;
 
     public event Action? SessionExpired;
 
-    public AuthManager(IApiClient api, ISecureStore secureStore, ILocalDB localDb, ISyncSvc sync, INotif notif, INotifSettingsSync settingsSync)
+    public AuthManager(IApiClient api, ISecureStore secureStore, ILocalDB localDb, ISyncSvc sync, 
+        INotif notif, INotifSettingsSync settingsSync, IGoogleAuth google)
     {
         _api = api;
         _secureStore = secureStore;
@@ -55,6 +58,7 @@ public sealed class AuthManager : IAuth
         _sync = sync;
         _notif = notif;
         _settingsSync = settingsSync;
+        _google = google;
         _api.SessionExpired += () =>
         {
             _sync.Stop();
@@ -200,5 +204,18 @@ public sealed class AuthManager : IAuth
         var profile = await _api.PutAsync<UpdateProfileRequest, ProfileDto>(
             "api/profile", new UpdateProfileRequest(name), ct);
         Preferences.Default.Set(PreferenceKeys.UserName, profile.Name);
+    }
+    
+    public async Task<bool> LoginWithGoogleAsync(CancellationToken ct = default)
+    {
+        var idToken = await _google.GetIdTokenAsync(ct);
+        if (idToken is null)
+        {
+            return false; // скасовано
+        }
+
+        var response = await _api.GoogleLoginAsync(idToken, ct);
+        await OnSignedInAsync(response); // те саме завершення входу, що й для пароля
+        return true;
     }
 }

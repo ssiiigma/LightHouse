@@ -45,7 +45,7 @@ public sealed class LighthouseDbContext(DbContextOptions<LighthouseDbContext> op
             e.Property(x => x.Name).HasMaxLength(100).IsRequired();
             e.Property(x => x.Email).HasMaxLength(256).IsRequired();
             e.Property(x => x.PasswordHash).HasMaxLength(100);
-            e.Property(x => x.GoogleSubject).HasMaxLength(64);
+            e.Property(x => x.GoogleId).HasMaxLength(64);
             e.Property(x => x.TimeZoneId).HasMaxLength(64);
             e.HasIndex(x => x.Email).IsUnique();
             e.HasOne(x => x.NotificationSettings)

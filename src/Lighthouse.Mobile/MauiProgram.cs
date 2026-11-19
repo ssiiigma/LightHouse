@@ -83,6 +83,7 @@ public static class MauiProgram
         builder.Services.AddTransient<Views.ForgotPasswordPage>();
         builder.Services.AddTransient<ViewModels.BackupsViewModel>();
         builder.Services.AddTransient<Views.BackupsPage>();
+        builder.Services.AddSingleton<IGoogleAuth, GoogleAuthService>();
         
 #if DEBUG
         builder.Logging.AddDebug();

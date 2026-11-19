@@ -15,3 +15,8 @@ dump.sh
 build_errors.txt
 simulation-results/
 *.DotSettings.user
+
+google-services.json
+*firebase*adminsdk*.json
+firebase-service-account.json
+client_secret*.json

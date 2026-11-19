@@ -8,6 +8,7 @@ using Lighthouse.Shared.Contracts.Habits;
 using Lighthouse.Shared.Contracts.Tasks;
 using Lighthouse.Shared.Enums;
 using Lighthouse.Api.Services.Email;
+using Lighthouse.Api.Services.Auth;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -154,6 +155,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
             });
             services.AddSingleton<IEmailQueue>(Emails);
             services.AddSingleton<ILogEventSink>(Logs);
+            services.AddSingleton<IGoogleTokenValidator, FakeGoogleTokenValidator>();
         });
     }
 }
@@ -214,5 +216,21 @@ public static class TestApi
 
         public IReadOnlyList<EmailMessage> To(string address) =>
             _messages.Where(m => string.Equals(m.To, address, StringComparison.OrdinalIgnoreCase)).ToList();
+    }
+}
+
+/// <summary>Замість запиту до Google розбирає токен виду «subject|email|verified|name».</summary>
+public sealed class FakeGoogleTokenValidator : IGoogleTokenValidator
+{
+    public static string Token(string subject, string email, bool verified = true, string name = "Google User") =>
+        $"{subject}|{email}|{verified}|{name}";
+
+    public Task<GoogleIdentity?> ValidateAsync(string idToken, CancellationToken ct)
+    {
+        var parts = idToken.Split('|');
+        return Task.FromResult<GoogleIdentity?>(
+            parts.Length == 4 && bool.TryParse(parts[2], out var verified)
+                ? new GoogleIdentity(parts[0], parts[1], verified, parts[3])
+                : null);
     }
 }

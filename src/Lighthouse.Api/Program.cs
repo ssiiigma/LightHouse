@@ -37,6 +37,7 @@ builder.Host.UseSerilog((context, services, logger) => logger
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
 builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection(SmtpOptions.SectionName));
 builder.Services.Configure<AppOptions>(builder.Configuration.GetSection(AppOptions.SectionName));
+builder.Services.Configure<GoogleOptions>(builder.Configuration.GetSection(GoogleOptions.SectionName));
 var jwt = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new JwtOptions();
 if (jwt.Secret.Length < 32)
 {
@@ -111,6 +112,7 @@ builder.Services.AddScoped<BackupScheduler>();
 builder.Services.AddScoped<ArchiveCleaner>();
 builder.Services.AddScoped<INotificationSettingsService, NotificationSettingsService>();
 builder.Services.AddScoped<IDeviceService, DeviceService>();
+builder.Services.AddSingleton<IGoogleTokenValidator, GoogleTokenValidator>();
 
 if (builder.Configuration.GetValue("Workers:BackupEnabled", true))
 {

@@ -26,3 +26,8 @@ public sealed class RefreshRequestValidator : AbstractValidator<RefreshRequest>
 {
     public RefreshRequestValidator() => RuleFor(x => x.RefreshToken).NotEmpty();
 }
+
+public sealed class GoogleLoginRequestValidator : AbstractValidator<GoogleLoginRequest>
+{
+    public GoogleLoginRequestValidator() => RuleFor(x => x.IdToken).NotEmpty().MaximumLength(4096);
+}
