@@ -9,6 +9,8 @@ using Lighthouse.Shared.Contracts.Tasks;
 using Lighthouse.Shared.Enums;
 using Lighthouse.Api.Services.Email;
 using Lighthouse.Api.Services.Auth;
+using Lighthouse.Api.Services.Calendar;
+using Lighthouse.Api.Services.Push;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -54,6 +56,8 @@ internal static class TestEnvironment
             Environment.SetEnvironmentVariable("Recommendations__ModelTrainingEnabled", "false");
             Environment.SetEnvironmentVariable("Workers__BackupEnabled", "false");
             Environment.SetEnvironmentVariable("Workers__MaintenanceEnabled", "false");
+            Environment.SetEnvironmentVariable("Workers__CalendarEnabled", "false");
+            Environment.SetEnvironmentVariable("Workers__PushEnabled", "false");
             AppDomain.CurrentDomain.ProcessExit += (_, _) => DropDatabase();
         }
     }
@@ -133,6 +137,10 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
     public TestApi.CapturingEmailQueue Emails { get; } = new();
 
     public CapturingSink Logs { get; } = new();
+    
+    public FakePushSender Push { get; } = new();
+    
+    public FakeGoogleCalendarClient Calendar { get; } = new();
 
     public ApiFactory(Action<RateLimitOptions>? configureLimits = null)
     {
@@ -156,6 +164,8 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
             services.AddSingleton<IEmailQueue>(Emails);
             services.AddSingleton<ILogEventSink>(Logs);
             services.AddSingleton<IGoogleTokenValidator, FakeGoogleTokenValidator>();
+            services.AddSingleton<IGoogleCalendarClient>(Calendar);
+            services.AddSingleton<IPushSender>(Push);
         });
     }
 }
@@ -232,5 +242,106 @@ public sealed class FakeGoogleTokenValidator : IGoogleTokenValidator
             parts.Length == 4 && bool.TryParse(parts[2], out var verified)
                 ? new GoogleIdentity(parts[0], parts[1], verified, parts[3])
                 : null);
+    }
+}
+
+/// <summary>Замість Google: пам'ятає створені події й журнал викликів, може імітувати відкликання доступу й збої.</summary>
+public sealed class FakeGoogleCalendarClient : IGoogleCalendarClient
+{
+    private int _next;
+
+    public ConcurrentDictionary<string, CalendarEventData> Events { get; } = new();
+    public ConcurrentQueue<string> Operations { get; } = new();
+    public bool InvalidGrant { get; set; }
+    public bool Transient { get; set; }
+
+    public string BuildAuthorizationUrl(string state, string redirectUri) =>
+        $"https://accounts.example.test/auth?state={Uri.EscapeDataString(state)}&redirect_uri={Uri.EscapeDataString(redirectUri)}";
+
+    public Task<GoogleTokenResponse> ExchangeCodeAsync(string code, string redirectUri, CancellationToken ct) =>
+        code == "bad"
+            ? throw new CalendarAuthException("bad code")
+            : Task.FromResult(new GoogleTokenResponse("refresh-token", "access-token", 3600));
+
+    public Task<string> GetAccessTokenAsync(Guid userId, string refreshToken, CancellationToken ct) =>
+        InvalidGrant ? throw new CalendarAuthException("revoked") : Task.FromResult("access-token");
+
+    public Task<string> CreateEventAsync(string accessToken, string calendarId, CalendarEventData data, CancellationToken ct)
+    {
+        ThrowIfTransient();
+
+        var existing = Events.Where(e => e.Value.TaskId == data.TaskId).Select(e => e.Key).OrderBy(k => k).ToList();
+        if (existing.Count > 0)
+        {
+            foreach (var extra in existing.Skip(1))
+            {
+                Events.TryRemove(extra, out _);
+                Operations.Enqueue("delete:" + extra);
+            }
+
+            Events[existing[0]] = data;
+            Operations.Enqueue("adopt:" + existing[0]);
+            return Task.FromResult(existing[0]);
+        }
+
+        var id = "evt-" + Interlocked.Increment(ref _next);
+        Events[id] = data;
+        Operations.Enqueue("create:" + id);
+        return Task.FromResult(id);
+    }
+
+    public Task<bool> UpdateEventAsync(string accessToken, string calendarId, string eventId, CalendarEventData data, CancellationToken ct)
+    {
+        ThrowIfTransient();
+        if (!Events.ContainsKey(eventId))
+        {
+            return Task.FromResult(false);
+        }
+
+        Events[eventId] = data;
+        Operations.Enqueue("update:" + eventId);
+        return Task.FromResult(true);
+    }
+
+    public Task DeleteEventAsync(string accessToken, string calendarId, string eventId, CancellationToken ct)
+    {
+        ThrowIfTransient();
+        Events.TryRemove(eventId, out _);
+        Operations.Enqueue("delete:" + eventId);
+        return Task.CompletedTask;
+    }
+
+    public Task RevokeAsync(string token, CancellationToken ct)
+    {
+        Operations.Enqueue("revoke");
+        return Task.CompletedTask;
+    }
+
+    private void ThrowIfTransient()
+    {
+        if (Transient)
+        {
+            throw new CalendarTransientException("simulated");
+        }
+    }
+}
+
+/// <summary>Замість FCM: запам'ятовує надіслане; окремі токени можна оголосити недійсними.</summary>
+public sealed class FakePushSender : IPushSender
+{
+    public ConcurrentQueue<(string Token, IReadOnlyDictionary<string, string> Data)> Sent { get; } = new();
+    public ConcurrentDictionary<string, bool> UnregisteredTokens { get; } = new();
+
+    public bool IsConfigured => true;
+
+    public Task<PushResult> SendAsync(string deviceToken, IReadOnlyDictionary<string, string> data, CancellationToken ct)
+    {
+        if (UnregisteredTokens.ContainsKey(deviceToken))
+        {
+            return Task.FromResult(PushResult.Unregistered);
+        }
+
+        Sent.Enqueue((deviceToken, data));
+        return Task.FromResult(PushResult.Sent);
     }
 }

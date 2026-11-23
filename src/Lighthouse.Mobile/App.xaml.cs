@@ -4,12 +4,13 @@ namespace Lighthouse.Mobile;
 
 public partial class App : Application
 {
-    public App(INotif notif, INotifSettingsSync settingsSync)
+    public App(INotif notif, INotifSettingsSync settingsSync, Services.Push.IPushSvc push)
     {
         InitializeComponent();
         UserAppTheme = AppTheme.Dark; // застосунок лише в темній темі: системні діалоги теж темні
         notif.Start();
         settingsSync.Start();
+        push.Start();
     }
 
     protected override Window CreateWindow(IActivationState? activationState) => new(new AppShell());

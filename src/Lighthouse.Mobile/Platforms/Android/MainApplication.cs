@@ -17,4 +17,10 @@ public class MainApplication : MauiApplication
     }
 
     protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
+    
+    public override void OnCreate()
+    {
+        base.OnCreate();
+        NotificationChannels.EnsureCreated(this);
+    }
 }

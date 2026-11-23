@@ -31,6 +31,11 @@ public interface INotifSettings
     void MarkClean(long revision);
 
     void ResetSyncState();
+    
+    (bool DailyDigest, bool SmartReminders) GetServerFlags();
+
+    /// <summary>Щоденний огляд і розумні нагадування (їх надсилає сервер): зміна користувача, яку треба передати на сервер.</summary>
+    void SaveServerFlags(bool dailyDigest, bool smartReminders);
 }
 
 public sealed class NotificationSettingsStore : INotifSettings
@@ -110,5 +115,17 @@ public sealed class NotificationSettingsStore : INotifSettings
         p.Set(Prefix + "quiet", prefs.QuietEnabled);
         p.Set(Prefix + "quiet.start", (int)prefs.QuietStart.TotalMinutes);
         p.Set(Prefix + "quiet.end", (int)prefs.QuietEnd.TotalMinutes);
+    }
+    
+    public (bool DailyDigest, bool SmartReminders) GetServerFlags() => (DailyDigest, SmartReminders);
+
+    public void SaveServerFlags(bool dailyDigest, bool smartReminders)
+    {
+        Preferences.Default.Set(Prefix + "digest", dailyDigest);
+        Preferences.Default.Set(Prefix + "smart", smartReminders);
+        Preferences.Default.Set(Prefix + "rev", Revision + 1);
+        Preferences.Default.Set(Prefix + "dirty", true);
+        Changed?.Invoke();
+        UserChanged?.Invoke();
     }
 }

@@ -6,8 +6,8 @@ using Lighthouse.Mobile.Services.Notifications;
 using Lighthouse.Mobile.Services.Sync;
 using Lighthouse.Shared.Contracts.Auth;
 using Lighthouse.Mobile.Localization;
-using Lighthouse.Mobile.Services.Notifications;
 using Lighthouse.Shared.Contracts.Profile;
+using Lighthouse.Mobile.Services.Push;
 
 namespace Lighthouse.Mobile.Services.Auth;
 
@@ -46,11 +46,12 @@ public sealed class AuthManager : IAuth
     private readonly INotif _notif;
     private readonly INotifSettingsSync _settingsSync;
     private readonly IGoogleAuth _google;
+    private readonly IPushSvc _push;
 
     public event Action? SessionExpired;
 
     public AuthManager(IApiClient api, ISecureStore secureStore, ILocalDB localDb, ISyncSvc sync, 
-        INotif notif, INotifSettingsSync settingsSync, IGoogleAuth google)
+        INotif notif, INotifSettingsSync settingsSync, IGoogleAuth google, IPushSvc push)
     {
         _api = api;
         _secureStore = secureStore;
@@ -59,6 +60,7 @@ public sealed class AuthManager : IAuth
         _notif = notif;
         _settingsSync = settingsSync;
         _google = google;
+        _push = push;
         _api.SessionExpired += () =>
         {
             _sync.Stop();
@@ -81,6 +83,7 @@ public sealed class AuthManager : IAuth
 
     public async Task<AuthResponse> LoginAsync(string email, string password, CancellationToken ct = default)
     {
+        await _push.UnregisterAsync();
         var auth = await _api.LoginAsync(email, password, ct);
         await OnSignedInAsync(auth);
         return auth;
@@ -146,6 +149,7 @@ public sealed class AuthManager : IAuth
             await _sync.SyncNowAsync(limit.Token);
             _notif.RequestReschedule();
             _settingsSync.RequestSync();
+            _push.RequestRegister();
         }
         catch (Exception)
         {

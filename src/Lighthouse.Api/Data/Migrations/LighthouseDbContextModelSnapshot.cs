@@ -140,7 +140,7 @@ namespace Lighthouse.Api.Data.Migrations
                     b.Property<bool>("IsEnabled")
                         .HasColumnType("bit");
 
-                    b.Property<string>("RefreshTokenProtected")
+                    b.Property<string>("RefreshTokenEncrypted")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -160,7 +160,7 @@ namespace Lighthouse.Api.Data.Migrations
                         .HasMaxLength(1024)
                         .HasColumnType("nvarchar(1024)");
 
-                    b.Property<DateTime>("LastSyncedAtUtc")
+                    b.Property<DateTime>("SyncedAtUtc")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("TaskId")

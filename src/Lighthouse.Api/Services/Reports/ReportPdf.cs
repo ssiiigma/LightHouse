@@ -46,7 +46,7 @@ internal static class ReportFonts
                     continue;
                 }
 
-                FontManager.RegisterFont(new MemoryStream(File.ReadAllBytes(path)));
+                FontManager.RegisterFontFromStream(new MemoryStream(File.ReadAllBytes(path)));
                 found++;
             }
 

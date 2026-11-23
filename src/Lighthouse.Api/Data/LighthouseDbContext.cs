@@ -148,7 +148,7 @@ public sealed class LighthouseDbContext(DbContextOptions<LighthouseDbContext> op
         {
             e.HasKey(x => x.UserId);
             e.Property(x => x.GoogleAccountEmail).HasMaxLength(256).IsRequired();
-            e.Property(x => x.RefreshTokenProtected).HasColumnType("nvarchar(max)").IsRequired();
+            e.Property(x => x.RefreshTokenEncrypted).HasColumnType("nvarchar(max)").IsRequired();
             e.Property(x => x.CalendarId).HasMaxLength(256).IsRequired();
             e.HasOne<User>().WithOne().HasForeignKey<CalendarConnection>(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         });

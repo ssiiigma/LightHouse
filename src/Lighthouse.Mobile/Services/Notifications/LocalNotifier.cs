@@ -1,5 +1,7 @@
 using Plugin.LocalNotification;
 using Plugin.LocalNotification.Core.Models;
+using Plugin.LocalNotification.AndroidOption;
+using Plugin.LocalNotification.Core.Models.AndroidOption;
 
 namespace Lighthouse.Mobile.Services.Notifications;
 
@@ -19,6 +21,11 @@ public sealed class LocalNotifier : ILocalNotif
             NotificationId = id,
             Title = title,
             Description = body,
+            Android = new AndroidOptions
+            {
+                ChannelId = NotificationChannels.Reminders,
+                Priority = AndroidPriority.High
+            },
             Schedule = new NotificationRequestSchedule { NotifyTime = localTime }
         };
 

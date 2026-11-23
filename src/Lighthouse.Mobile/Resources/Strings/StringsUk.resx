@@ -248,4 +248,38 @@
     <data name="Auth_Or" xml:space="preserve"><value>або</value></data>
     <data name="Err_GoogleFailed" xml:space="preserve"><value>Не вдалося увійти через Google. Спробуйте ще раз.</value></data>
     <data name="Err_GoogleConflict" xml:space="preserve"><value>Ця адреса вже прив'язана до іншого облікового запису Google.</value></data>
+    <data name="Calendar_Title" xml:space="preserve"><value>Google Calendar</value></data>
+    <data name="Calendar_Info" xml:space="preserve"><value>Завдання з дедлайном з'являються в основному календарі Google як події, що закінчуються в момент дедлайну й тривають стільки, скільки вказано в орієнтовній тривалості (за замовчуванням 30 хв). Зміни переносяться автоматично протягом 2 хвилин. Зміни в календарі до Lighthouse не повертаються.</value></data>
+    <data name="Calendar_Connect" xml:space="preserve"><value>Підключити Google Calendar</value></data>
+    <data name="Calendar_SyncNow" xml:space="preserve"><value>Синхронізувати зараз</value></data>
+    <data name="Calendar_Disconnect" xml:space="preserve"><value>Відключити</value></data>
+    <data name="Calendar_Connected" xml:space="preserve"><value>Підключено</value></data>
+    <data name="Calendar_NotConnected" xml:space="preserve"><value>Не підключено</value></data>
+    <data name="Calendar_Events" xml:space="preserve"><value>Подій у календарі: {0}</value></data>
+    <data name="Calendar_Finish" xml:space="preserve"><value>Завершіть вхід у браузері, потім поверніться до застосунку.</value></data>
+    <data name="Calendar_SyncResult" xml:space="preserve"><value>Додано: {0}, оновлено: {1}, видалено: {2}.</value></data>
+    <data name="Calendar_SyncRemaining" xml:space="preserve"><value> Ще {0} буде оброблено автоматично.</value></data>
+    <data name="Calendar_DisconnectTitle" xml:space="preserve"><value>Відключення календаря</value></data>
+    <data name="Calendar_DisconnectConfirm" xml:space="preserve"><value>Події, створені Lighthouse, буде видалено з вашого календаря. Продовжити?</value></data>
+    <data name="Calendar_NotConnectedError" xml:space="preserve"><value>Календар не підключено. Спершу підключіть його.</value></data>
+    <data name="Calendar_SyncFailed" xml:space="preserve"><value>Не вдалося синхронізувати календар. Спробуйте пізніше.</value></data>
+    <data name="Form_CategoryHeader" xml:space="preserve"><value>Категорії</value></data>
+    <data name="Calendar_PendingChanges" xml:space="preserve"><value>Зміни завдань ще не надіслано на сервер. Перевірте з'єднання й повторіть.</value></data>
+    <data name="Notif_Digest" xml:space="preserve"><value>Щоденний огляд (зранку)</value></data>
+    <data name="Notif_Smart" xml:space="preserve"><value>Розумні нагадування</value></data>
+    <data name="Notif_ServerHint" xml:space="preserve"><value>Ці сповіщення надсилає сервер. Огляд приходить зранку, якщо є завдання на сьогодні. Розумне нагадування приходить у ваш найпродуктивніший час, якщо є важливі завдання.</value></data>
+    <data name="Push_TestButton" xml:space="preserve"><value>Надіслати тестове сповіщення</value></data>
+    <data name="Push_TestSent" xml:space="preserve"><value>Тестове сповіщення надіслано.</value></data>
+    <data name="Push_TestNone" xml:space="preserve"><value>Не знайдено пристроїв для сповіщень. Увійдіть у застосунок за наявності мережі й дозвольте сповіщення.</value></data>
+    <data name="Push_DigestTitle" xml:space="preserve"><value>Огляд дня</value></data>
+    <data name="Push_DigestBody" xml:space="preserve"><value>Завдань на сьогодні: {0}. Найважливіше: «{1}»</value></data>
+    <data name="Push_SmartTitle" xml:space="preserve"><value>Найкращий час для роботи</value></data>
+    <data name="Push_SmartBody" xml:space="preserve"><value>Зараз ви найпродуктивніші. Почніть із «{0}»</value></data>
+    <data name="Push_TestTitle" xml:space="preserve"><value>Lighthouse</value></data>
+    <data name="Push_TestBody" xml:space="preserve"><value>Push-сповіщення працюють.</value></data>
+    <data name="Channel_Reminders" xml:space="preserve"><value>Нагадування</value></data>
+    <data name="Channel_RemindersDescription" xml:space="preserve"><value>Нагадування про завдання й звички</value></data>
+    <data name="Channel_Push" xml:space="preserve"><value>Огляд і поради</value></data>
+    <data name="Channel_PushDescription" xml:space="preserve"><value>Щоденний огляд і розумні нагадування</value></data>
+    
 </root>

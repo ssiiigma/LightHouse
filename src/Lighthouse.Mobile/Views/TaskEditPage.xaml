@@ -121,32 +121,36 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <!-- Деталі -->
+                                <!-- Категорії -->
                 <Border Style="{StaticResource CardBorder}" Padding="16,14">
                     <VerticalStackLayout Spacing="10">
-                        <Label Text="{loc:Translate Form_SectionDetails}" Style="{StaticResource SectionLabel}" />
 
-                        <Label Text="{loc:Translate Form_Category}" FontFamily="DMSansMedium" />
-                        <Border Style="{StaticResource FieldBorder}">
-                            <Picker ItemsSource="{Binding Categories}" 
-                                    SelectedItem="{Binding SelectedCategory}" />
-                        </Border>
+                        <!-- Заголовок і «Керувати категоріями» в одному рядку, праворуч, на рівні заголовка -->
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="{loc:Translate Form_CategoryHeader}" Style="{StaticResource SectionLabel}"
+                                   VerticalOptions="Center" />
+                            <Label Grid.Column="1" Text="{loc:Translate Cat_Manage}" FontSize="11"
+                                   TextColor="{StaticResource GoldLight}" VerticalOptions="Center">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenCategoriesCommand}" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </Grid>
+
+                        <Picker ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" />
+
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                             <Border Style="{StaticResource FieldBorder}">
-                                <Entry Text="{Binding NewCategoryName}" Placeholder="{loc:Translate Form_NewCategory}" />
+                                <Entry Text="{Binding NewCategoryName}" Placeholder="{loc:Translate Form_NewCategory}"
+                                       ReturnCommand="{Binding AddCategoryCommand}" />
                             </Border>
                             <Button Grid.Column="1" Text="+" Command="{Binding AddCategoryCommand}"
                                     WidthRequest="48" HeightRequest="48" Padding="0" FontSize="22" CornerRadius="14" />
                         </Grid>
-                        <controls:NoticeView Text="{Binding InfoMessage}"
-                                             IsVisible="{Binding InfoMessage, Converter={StaticResource StringToBoolConverter}}" />
-                        <Button Text="{loc:Translate Cat_Manage}" Style="{StaticResource GhostButton}"
-                                HorizontalOptions="Start" Command="{Binding OpenCategoriesCommand}" />
 
-                        <Label Text="{loc:Translate Form_Estimate}" FontFamily="DMSansMedium" Margin="0,6,0,0" />
-                        <Border Style="{StaticResource FieldBorder}">
-                            <Entry Text="{Binding Estimate}" Keyboard="Numeric" Placeholder="30" />
-                        </Border>
+                        <!-- Не займає місця, поки немає повідомлення -->
+                        <controls:NoticeView Text="{Binding CategoryInfo}"
+                                             IsVisible="{Binding CategoryInfo, Converter={StaticResource StringToBoolConverter}}" />
                     </VerticalStackLayout>
                 </Border>
 

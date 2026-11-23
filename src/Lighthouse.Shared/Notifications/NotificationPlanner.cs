@@ -138,4 +138,7 @@ public static class NotificationPlanner
         var start = date.AddDays(-AnalyticsCalculator.DayIndex(date));
         return Enumerable.Range(0, 7).Count(i => logs.Contains(start.AddDays(i)));
     }
+    
+    /// <param name="Sent">Скільки пристроїв прийняли тестове сповіщення.</param>
+    public sealed record PushTestResultDto(int Sent);
 }

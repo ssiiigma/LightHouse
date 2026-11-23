@@ -24,6 +24,7 @@ public interface IApiClient
     Task<TResponse> PostAsync<TRequest, TResponse>(string path, TRequest body, CancellationToken ct);
     Task<TResponse> PostBytesAsync<TResponse>(string path, byte[] body, string contentType, CancellationToken ct);
     Task<AuthResponse> GoogleLoginAsync(string idToken, CancellationToken ct);
+    Task PostNoContentAsync<TRequest>(string path, TRequest body, CancellationToken ct);
 }
 
 public sealed class ApiClient(HttpClient http, ISecureStore secureStore) : IApiClient
@@ -203,6 +204,13 @@ public sealed class ApiClient(HttpClient http, ISecureStore secureStore) : IApiC
     {
         using var response = await http.PostAsJsonAsync("api/auth/google", new GoogleLoginRequest(idToken), ct);
         return await ReadAuthResponseAsync(response, ct);
+    }
+    
+    public async Task PostNoContentAsync<TRequest>(string path, TRequest body, CancellationToken ct)
+    {
+        using var response = await SendAsync(
+            () => new HttpRequestMessage(HttpMethod.Post, path) { Content = JsonContent.Create(body) }, ct);
+        await EnsureSuccessAsync(response, ct);
     }
 }
 

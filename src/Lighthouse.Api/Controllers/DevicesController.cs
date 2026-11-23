@@ -4,6 +4,9 @@ using Lighthouse.Api.Services.Notifications;
 using Lighthouse.Shared.Contracts.Notifications;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Lighthouse.Shared.Contracts.Notifications;
+using Lighthouse.Shared.Notifications;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Lighthouse.Api.Controllers;
 
@@ -32,4 +35,10 @@ public sealed class DevicesController(IDeviceService devices) : ApiControllerBas
         await devices.UnregisterAsync(User.GetUserId(), token, ct);
         return NoContent();
     }
+    
+    /// <summary>Тестове push на пристрої користувача (перевірка, що канал працює).</summary>
+    [HttpPost("test")]
+    [EnableRateLimiting(RateLimitPolicies.Auth)]
+    public async Task<ActionResult<NotificationPlanner.PushTestResultDto>> Test(CancellationToken ct) =>
+        Ok(new NotificationPlanner.PushTestResultDto(await devices.SendTestAsync(User.GetUserId(), ct)));
 }

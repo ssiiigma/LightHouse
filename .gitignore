@@ -20,3 +20,23 @@ google-services.json
 *firebase*adminsdk*.json
 firebase-service-account.json
 client_secret*.json
+
+# Секрети й службові файли
+.env
+google-services.json
+*adminsdk*.json
+firebase-service-account.json
+client_secret*.json
+lighthouse_dump.txt
+sync_dump.txt
+build_errors.txt
+simulation-results/
+bin/
+obj/
+.idea/
+.vs/
+
+.DS_Store
+**/.DS_Store
+dump.sh
+*.DotSettings.user

@@ -86,7 +86,7 @@ public sealed partial class AnalyticsViewModel(
             return;
         }
 
-        var choice = await Shell.Current.CurrentPage.DisplayActionSheet(
+        var choice = await Shell.Current.CurrentPage.DisplayActionSheetAsync(
             loc["Export_Title"], loc["Btn_Cancel"], null, "PDF", "CSV");
         if (choice is not ("PDF" or "CSV"))
         {

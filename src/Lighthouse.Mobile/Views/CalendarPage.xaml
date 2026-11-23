@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Lighthouse.Mobile.ViewModels"
+             xmlns:conv="clr-namespace:Lighthouse.Mobile.Converters"
+             xmlns:controls="clr-namespace:Lighthouse.Mobile.Controls"
+             xmlns:loc="clr-namespace:Lighthouse.Mobile.Localization"
+             x:Class="Lighthouse.Mobile.Views.CalendarPage"
+             x:DataType="vm:CalendarViewModel"
+             Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <conv:StringToBoolConverter x:Key="StringToBoolConverter" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*">
+
+        <Grid Padding="20,52,20,8" ColumnDefinitions="Auto,*" ColumnSpacing="12">
+            <Button Text="‹" Command="{Binding GoBackCommand}" WidthRequest="40" HeightRequest="40" Padding="0"
+                    FontSize="24" CornerRadius="12" BackgroundColor="{StaticResource Card}"
+                    BorderColor="{StaticResource Dim}" BorderWidth="1" TextColor="{StaticResource Cream}" />
+            <Label Grid.Column="1" Text="{loc:Translate Calendar_Title}" FontFamily="DMSansSemibold" FontSize="20"
+                   VerticalOptions="Center" />
+        </Grid>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="16,8,16,32" Spacing="12">
+
+                <Label Text="{loc:Translate Calendar_Info}" Style="{StaticResource SubtitleLabel}" FontSize="12" />
+
+                <Border Style="{StaticResource CardBorder}" Padding="16,14">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{Binding StatusText}" FontFamily="DMSansSemibold" FontSize="16" />
+                        <Label Text="{Binding DetailText}" Style="{StaticResource CaptionLabel}"
+                               IsVisible="{Binding DetailText, Converter={StaticResource StringToBoolConverter}}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <controls:NoticeView Text="{Binding InfoMessage}" />
+                <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Red}"
+                       IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBoolConverter}}" />
+                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+
+                <Button Text="{loc:Translate Calendar_Connect}" Style="{StaticResource PrimaryButton}" HeightRequest="48"
+                        Command="{Binding ConnectCommand}" IsVisible="{Binding IsDisconnected}" />
+
+                <Button Text="{loc:Translate Calendar_SyncNow}" Style="{StaticResource SecondaryButton}" HeightRequest="48"
+                        Command="{Binding SyncNowCommand}" IsVisible="{Binding IsConnected}" />
+                <Button Text="{loc:Translate Calendar_Disconnect}" Style="{StaticResource DangerButton}" HeightRequest="48"
+                        Command="{Binding DisconnectCommand}" IsVisible="{Binding IsConnected}" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

@@ -16,6 +16,7 @@ using Lighthouse.Api.Services.Reports;
 using Lighthouse.Api.Services.Email;
 using Lighthouse.Api.Services.Backups;
 using Lighthouse.Api.Services.Notifications;
+using Lighthouse.Api.Services.Push;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
@@ -113,6 +114,18 @@ builder.Services.AddScoped<ArchiveCleaner>();
 builder.Services.AddScoped<INotificationSettingsService, NotificationSettingsService>();
 builder.Services.AddScoped<IDeviceService, DeviceService>();
 builder.Services.AddSingleton<IGoogleTokenValidator, GoogleTokenValidator>();
+builder.Services.AddSingleton<CalendarTrigger>();
+
+builder.Services.Configure<FirebaseOptions>(builder.Configuration.GetSection(FirebaseOptions.SectionName));
+builder.Services.Configure<PushOptions>(builder.Configuration.GetSection(PushOptions.SectionName));
+builder.Services.AddSingleton<IPushSender, FcmPushSender>();
+builder.Services.AddScoped<IPushLog, EfPushLog>();
+builder.Services.AddScoped<PushScheduler>();
+
+if (builder.Configuration.GetValue("Workers:PushEnabled", true))
+{
+    builder.Services.AddHostedService<PushWorker>();
+}
 
 if (builder.Configuration.GetValue("Workers:BackupEnabled", true))
 {
@@ -127,6 +140,18 @@ if (builder.Configuration.GetValue("Workers:MaintenanceEnabled", true))
 if (builder.Configuration.GetValue("Recommendations:ModelTrainingEnabled", true))
 {
     builder.Services.AddHostedService<ModelTrainingWorker>();
+}
+
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient("google", client => client.Timeout = TimeSpan.FromSeconds(20));
+builder.Services.AddSingleton<IGoogleCalendarClient, GoogleCalendarClient>();
+builder.Services.AddSingleton<CalendarStateProtector>();
+builder.Services.AddScoped<ICalendarStore, EfCalendarStore>();
+builder.Services.AddScoped<ICalendarSyncService, CalendarSyncService>();
+
+if (builder.Configuration.GetValue("Workers:CalendarEnabled", true))
+{
+    builder.Services.AddHostedService<CalendarWorker>();
 }
 
 var app = builder.Build();
@@ -149,6 +174,26 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseRateLimiter(); // після автентифікації: ліміт на користувача знає sub; перед авторизацією: 401-запити теж рахуються
 app.UseAuthorization();
+
+// Після будь-якої успішної зміни даних завдань запускаємо (з затримкою 3 с) синхронізацію календаря користувача.
+app.Use(async (context, next) =>
+{
+    await next();
+
+    if (context.Response.StatusCode is >= 200 and < 300
+        && context.User.Identity?.IsAuthenticated == true
+        && IsTaskDataWrite(context.Request))
+    {
+        context.RequestServices.GetRequiredService<CalendarTrigger>().Notify(context.User.GetUserId());
+    }
+});
+
+static bool IsTaskDataWrite(HttpRequest request) =>
+    request.Method is "PUT" or "POST" or "DELETE"
+    && (request.Path.StartsWithSegments("/api/tasks")
+        || request.Path.StartsWithSegments("/api/data/import")
+        || (request.Path.StartsWithSegments("/api/backups")
+            && request.Path.Value!.EndsWith("/restore", StringComparison.OrdinalIgnoreCase)));
 
 app.MapControllers();
 app.MapGet("/reset-password", (string? token) =>

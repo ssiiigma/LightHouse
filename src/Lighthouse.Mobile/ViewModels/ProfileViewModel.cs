@@ -6,13 +6,15 @@ using Lighthouse.Mobile.Services.Auth;
 using Lighthouse.Mobile.Services.Notifications;
 using Lighthouse.Mobile.Services.Sync;
 using Lighthouse.Shared.Notifications;
+using Lighthouse.Mobile.Services.Push;
 
 namespace Lighthouse.Mobile.ViewModels;
 
 /// <summary>Профіль і налаштування: ім'я, пошта, пояс, мова, сповіщення й тихий режим, синхронізація, вихід.</summary>
 public sealed partial class ProfileViewModel(
     IAuth auth, ISyncSvc sync, LocalizationService loc,
-    INotifSettings notifSettings, INotif notif, ISystemSettings system, INotifSettingsSync settingsSync) : ObservableObject
+    INotifSettings notifSettings, INotif notif, ISystemSettings system, 
+    INotifSettingsSync settingsSync, IPushSvc push) : ObservableObject
 {
     private bool _loadingPrefs;
 
@@ -35,12 +37,18 @@ public sealed partial class ProfileViewModel(
     [ObservableProperty] private string _syncSummary = string.Empty;
     [ObservableProperty] private string _syncDetail = string.Empty;
     [ObservableProperty] private bool _hasParked;
+    
+    [ObservableProperty] private bool _dailyDigestOn;
+    [ObservableProperty] private bool _smartRemindersOn = true;
 
     partial void OnTaskRemindersOnChanged(bool value) => SavePrefs();
     partial void OnHabitRemindersOnChanged(bool value) => SavePrefs();
     partial void OnQuietOnChanged(bool value) => SavePrefs();
     partial void OnQuietStartChanged(TimeSpan? value) => SavePrefs();
     partial void OnQuietEndChanged(TimeSpan? value) => SavePrefs();
+    partial void OnDailyDigestOnChanged(bool value) => SaveServerFlags();
+    partial void OnSmartRemindersOnChanged(bool value) => SaveServerFlags();
+
 
     public async Task LoadAsync()
     {
@@ -65,6 +73,9 @@ public sealed partial class ProfileViewModel(
         QuietOn = prefs.QuietEnabled;
         QuietStart = prefs.QuietStart;
         QuietEnd = prefs.QuietEnd;
+        var flags = notifSettings.GetServerFlags();
+        DailyDigestOn = flags.DailyDigest;
+        SmartRemindersOn = flags.SmartReminders;
         _loadingPrefs = false;
     }
 
@@ -74,6 +85,30 @@ public sealed partial class ProfileViewModel(
         if (await settingsSync.SyncAsync())
         {
             MainThread.BeginInvokeOnMainThread(LoadPrefs);
+        }
+    }
+    
+    private void SaveServerFlags()
+    {
+        if (!_loadingPrefs)
+        {
+            notifSettings.SaveServerFlags(DailyDigestOn, SmartRemindersOn);
+        }
+    }
+
+    [RelayCommand]
+    private async Task SendTestPushAsync()
+    {
+        try
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+            var sent = await push.SendTestAsync(cts.Token);
+            await Shell.Current.DisplayAlertAsync(
+                loc["Notif_Title"], sent > 0 ? loc["Push_TestSent"] : loc["Push_TestNone"], loc["Btn_Ok"]);
+        }
+        catch (Exception)
+        {
+            await Shell.Current.DisplayAlertAsync(loc["Notif_Title"], loc["Err_NoConnection"], loc["Btn_Ok"]);
         }
     }
 
@@ -226,4 +261,7 @@ public sealed partial class ProfileViewModel(
     
     [RelayCommand]
     private Task OpenBackupsAsync() => Shell.Current.GoToAsync(nameof(Views.BackupsPage));
+    
+    [RelayCommand]
+    private Task OpenCalendarAsync() => Shell.Current.GoToAsync(nameof(Views.CalendarPage));
 }

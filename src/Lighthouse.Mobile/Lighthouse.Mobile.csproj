@@ -36,6 +36,12 @@
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
         <PackageReference Include="Plugin.LocalNotification" Version="14.1.2" />
         <PackageReference Include="sqlite-net-pcl" Version="1.11.285" />
+        <PackageReference Include="Xamarin.AndroidX.Collection.Ktx" Version="1.7.0" />
+        <PackageReference Include="Xamarin.AndroidX.Fragment.Ktx" Version="1.9.1" />
+        <PackageReference Include="Xamarin.AndroidX.Lifecycle.LiveData" Version="2.11.0.1" />
+        <PackageReference Include="Xamarin.AndroidX.Lifecycle.LiveData.Core.Ktx" Version="2.11.0.1" />
+        <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.11.0.1" />
+        <PackageReference Include="Xamarin.Firebase.Messaging" Version="126.0.1" />
     </ItemGroup>
 
     <ItemGroup>
@@ -61,6 +67,10 @@
         <DependentUpon>TasksPage.xaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net10.0-android'">
+        <GoogleServicesJson Include="Platforms\Android\google-services.json" />
     </ItemGroup>
 
 </Project>

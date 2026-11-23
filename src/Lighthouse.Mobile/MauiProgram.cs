@@ -56,6 +56,10 @@ public static class MauiProgram
         builder.Services.AddSingleton<INotif, NotifManager>();
         builder.Services.AddSingleton<Services.Backups.IBackup, Services.Backups.BackupService>();
         builder.Services.AddSingleton<INotifSettingsSync, NotifSettingsSync>();
+        builder.Services.AddSingleton<IGoogleAuth, GoogleAuthService>();
+        builder.Services.AddSingleton<Services.Calendar.ICalendar, Services.Calendar.CalendarService>();
+        builder.Services.AddSingleton<Services.Push.IPushTokenSource, AndroidPushTokenSource>();
+        builder.Services.AddSingleton<Services.Push.IPushSvc, Services.Push.PushService>();
 
         // Екрани.
         builder.Services.AddTransient<ViewModels.WelcomeViewModel>();
@@ -83,7 +87,8 @@ public static class MauiProgram
         builder.Services.AddTransient<Views.ForgotPasswordPage>();
         builder.Services.AddTransient<ViewModels.BackupsViewModel>();
         builder.Services.AddTransient<Views.BackupsPage>();
-        builder.Services.AddSingleton<IGoogleAuth, GoogleAuthService>();
+        builder.Services.AddTransient<ViewModels.CalendarViewModel>();
+        builder.Services.AddTransient<Views.CalendarPage>();
         
 #if DEBUG
         builder.Logging.AddDebug();

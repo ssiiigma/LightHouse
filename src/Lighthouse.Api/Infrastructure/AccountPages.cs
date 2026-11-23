@@ -55,4 +55,10 @@ public static class AccountPages
         </style></head>
         <body><main><h1>LIGHTHOUSE</h1><h2>{{WebUtility.HtmlEncode(title)}}</h2><p>{{WebUtility.HtmlEncode(message)}}</p>{{extra}}</main></body></html>
         """;
+    
+    public static string CalendarResult(bool ok) => Page(
+        ok ? "Календар підключено / Calendar connected" : "Не вдалося підключити календар / Could not connect the calendar",
+        ok ? "Поверніться до застосунку Lighthouse. / Return to the Lighthouse app."
+            : "Спробуйте ще раз у застосунку. / Please try again in the app.",
+        string.Empty);
 }

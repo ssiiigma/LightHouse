@@ -33,6 +33,7 @@ services:
       dockerfile: src/Lighthouse.Api/Dockerfile
     container_name: lighthouse-api
     restart: unless-stopped
+    Firebase__ServiceAccountPath: /run/secrets/firebase-service-account.json
     depends_on:
       db:
         condition: service_healthy
@@ -48,10 +49,12 @@ services:
       Smtp__Host: mailpit
       Smtp__Port: "1025"
       App__PublicBaseUrl: http://localhost:8080
+      Google__WebClientSecret: ${GOOGLE_WEB_CLIENT_SECRET:-}
     ports:
       - "8080:8080"
     volumes:
       - dp-keys:/var/keys
+      - ${FIREBASE_SERVICE_ACCOUNT:-/dev/null}:/run/secrets/firebase-service-account.json:ro
 
 volumes:
   mssql-data:

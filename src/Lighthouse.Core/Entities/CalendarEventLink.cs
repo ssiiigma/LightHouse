@@ -7,5 +7,5 @@ public class CalendarEventLink
     public Guid UserId { get; set; }
     public Guid TaskId { get; set; }
     public string GoogleEventId { get; set; } = string.Empty;
-    public DateTime LastSyncedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime SyncedAtUtc { get; set; } = DateTime.UtcNow;
 }

@@ -30,7 +30,7 @@ public sealed class TimeInputView : ContentView
         grid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
 
         Place(grid, MakeArrow("▲", () => Step(hours: -1)), 0, 0);
-        Place(grid, Frame(_hour), 0, 1);
+        Place(grid, Framed(_hour), 0, 1);
         Place(grid, MakeArrow("▼", () => Step(hours: 1)), 0, 2);
 
         Place(grid, new Label
@@ -40,7 +40,7 @@ public sealed class TimeInputView : ContentView
         }, 1, 1);
 
         Place(grid, MakeArrow("▲", () => Step(minutes: -1)), 2, 0);
-        Place(grid, Frame(_minute), 2, 1);
+        Place(grid, Framed(_minute), 2, 1);
         Place(grid, MakeArrow("▼", () => Step(minutes: 1)), 2, 2);
 
         Content = grid;
@@ -88,7 +88,7 @@ public sealed class TimeInputView : ContentView
         WidthRequest = 70
     };
 
-    private static Border Frame(View content) => new()
+    private static Border Framed(View content) => new()
     {
         Content = content,
         BackgroundColor = Color.FromArgb("#1A2540"),

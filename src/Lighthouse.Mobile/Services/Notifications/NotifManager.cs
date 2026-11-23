@@ -125,7 +125,7 @@ public sealed class NotifManager(
                     ? TaskText(taskById[item.TargetId])
                     : (habitById[item.TargetId].Title, loc["Notif_HabitBody"]);
 
-                var signature = $"{item.AtLocal.Ticks}|{Hash(title + "|" + body)}";
+                var signature = $"{item.AtLocal.Ticks}|{Hash(title + "|" + body)}|ch2";
                 desired[item.Id] = signature;
 
                 if (stored.TryGetValue(item.Id, out var old) && old == signature)
